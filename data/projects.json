@@ -1,0 +1,119 @@
+[
+  {
+    "name": "Tauhei Solar Farm",
+    "type": "Solar",
+    "size": "202 MWp",
+    "state": "New Zealand",
+    "lat": -38,
+    "lng": 176.0,
+    "img": "https://www.nsenergybusiness.com/wp-content/uploads/sites/4/2025/08/Tauhei-1.webp"
+  },
+  {
+    "name": "Flyers Creek Wind Farm",
+    "type": "Wind",
+    "size": "145 MW",
+    "state": "NSW",
+    "lat": -32.0,
+    "lng": 147.5,
+    "img": "https://www.iberdrola.com.au/assets/Uploads/Turbines-in-Collector-Group-3-May-2023.jpg"
+  },
+  {
+    "name": "Queanbeyan BESS",
+    "type": "BESS",
+    "size": "10 MW / 20 MWh",
+    "state": "ACT",
+    "lat": -35.1,
+    "lng": 148.3,
+    "img": "https://utilitymagazine.com.au/wp-content/uploads/2025/04/CBESS-all-batteries-in-place-3-scaled-e1745473802882.jpeg"
+  },
+  {
+    "name": "Dinawan Substation",
+    "type": "Power Transmission",
+    "size": "2.3 GW",
+    "state": "NSW",
+    "lat": -34.0,
+    "lng": 146.0,
+    "img": "https://esdnews.com.au/wp-content/uploads/2025/11/dinawan-substation-transgrid.jpg"
+  },
+  {
+    "name": "Wagga Wagga Substation",
+    "type": "Power Transmission",
+    "size": "0.8 GW",
+    "state": "NSW",
+    "lat": -33.4,
+    "lng": 149.0,
+    "img": "https://esdnews.com.au/wp-content/uploads/2025/06/wagga-wagga-substation.jpg"
+  },
+  {
+    "name": "Buronga Substation",
+    "type": "Power Transmission",
+    "size": "0.8 GW",
+    "state": "NSW",
+    "lat": -34.0,
+    "lng": 141.3,
+    "img": "https://www.energymagazine.com.au/wp-content/uploads/2025/09/EnergyConnects-Buronga-substation-scaled.jpeg"
+  },
+  {
+    "name": "New England Solar Farm",
+    "type": "Solar",
+    "size": "522 MWp",
+    "state": "NSW",
+    "lat": -31.2,
+    "lng": 151.0,
+    "img": "https://reneweconomy.com.au/wp-content/uploads/2022/09/Metz-Solar-Farm-Aerial-view-COD-image2-copy.jpg"
+  },
+  {
+    "name": "Bungala I & II Solar Farm",
+    "type": "Solar",
+    "size": "275 MWp",
+    "state": "SA",
+    "lat": -32.5,
+    "lng": 137.5,
+    "img": "https://cdn.prod.website-files.com/6653d993407b837466a098c7/66694cebf00199dc29a20baa_bungala__lg.jpg"
+  },
+  {
+    "name": "Barcaldine Solar Farm",
+    "type": "Solar",
+    "size": "25 MWp",
+    "state": "QLD",
+    "lat": -21.6,
+    "lng": 143.4,
+    "img": "https://arena.gov.au/assets/2018/02/Lakeland-1.jpg"
+  },
+  {
+    "name": "Moree Solar Farm",
+    "type": "Solar",
+    "size": "72 MWp",
+    "state": "NSW",
+    "lat": -29.8,
+    "lng": 148.7,
+    "img": "https://www.gentari.com.au/wp-content/uploads/2023/09/DJI_0443-scaled.jpg"
+  },
+  {
+    "name": "Goyder South Wind Farm",
+    "type": "Wind",
+    "size": "412 MW",
+    "state": "SA",
+    "lat": -36.5,
+    "lng": 140.0,
+    "img": "https://icn.org.au/wp-content/uploads/2021/11/karsten-wurth-karsten-wuerth-lsJ9jHKIqHg-unsplash-scaled-aspect-ratio-760-430-scaled.jpg"
+  },
+  {
+    "name": "Port Augusta Renewable Energy Park",
+    "type": "Wind",
+    "size": "220 MW",
+    "state": "SA",
+    "lat": -33.8,
+    "lng": 138.5,
+    "img": "https://caltechsites-prod-assets.resources.caltech.edu/scienceexchange/images/wind-turbine-future-energy.2e16d0ba.fill-933x525-c100.jpg"
+  },
+  {
+    "name": "Blyth BESS",
+    "type": "BESS",
+    "size": "200 MW / 400 MWh",
+    "state": "TAS",
+    "lat": -35.2,
+    "lng": 139.2,
+    "img": "https://sympower.net/hubfs/BESS-Demand-Response-Whats-the-Connection-1920-1080px.jpg"
+  }
+]

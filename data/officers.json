@@ -1,0 +1,30 @@
+[
+  {
+    "name": "Sydney Office",
+    "city": "Sydney",
+    "lat": -33.8688,
+    "lng": 151.2093,
+    "img": "https://listingsprod.blob.core.windows.net/ourlistings-aus/b336eae3-3f7b-475c-8e05-699f65dc51a0/2bf8944c-d6b5-4aea-8989-d5bc082224d7-w"
+  },
+  {
+    "name": "Melbourne Office",
+    "city": "Melbourne",
+    "lat": -37.8136,
+    "lng": 144.9631,
+    "img": "https://i1.au.reastatic.net/712x496-smart=80,r=33,g=40,b=46,quality=60,progressive/715881a2ce17eaac55fe909d810122b7ad28bd0a3d97a2616654ad36302b2635/image8.jpg"
+  },
+  {
+    "name": "Brisbane Office",
+    "city": "Brisbane",
+    "lat": -27.4698,
+    "lng": 153.0251,
+    "img": "https://img.agentaccount.com/c99af59002fe26826f328c2cd89d1a9cc504b08d"
+  },
+  {
+    "name": "Adelaide Office",
+    "city": "Adelaide",
+    "lat": -33.9285,
+    "lng": 138.6007,
+    "img": "https://www.cbre.com.au/resources/fileassets/AU-GLDE-180672/e698856c/53d6ac06-4201-4d51-89b0-910cef252768_Photo_1_large.jpg"
+  }
+]

@@ -1,0 +1,85 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Energy Connect East 500 kV",
+        "img": "https://aecom.com/wp-content/uploads/2024/03/GettyImages-1329198682-1.jpg"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            149,
+            -33.4
+          ],
+          [
+            146,
+            -34.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Energy Connect East 330 kV",
+        "img": "https://media.licdn.com/dms/image/v2/D5622AQHleXuhcgkdXg/feedshare-shrink_800/B56Zxe5cC1J4Ag-/0/1771118642039?e=2147483647&v=beta&t=vr5HBGlZ_FvCTBX0NPgGxji3hYbSv0h1-bDsW-8O9rU"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            146.0,
+            -34.0
+          ],
+          [
+            141.3,
+            -34.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Energy Connect West 330 kV",
+        "img": "https://cf-images.ap-southeast-2.prod.boltdns.net/v1/static/5647924203001/4ea858e1-f142-4efd-b0cb-7b019f2a3c54/877436c7-19fa-4b55-a591-9879286dc132/1920x1080/match/image.jpg?pubId=5348771529001"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            139.0,
+            -33.0
+          ],
+          [
+            141.3,
+            -34.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Energy Connect West 220 kV",
+        "img": "https://media.istockphoto.com/id/1381550380/photo/high-voltage-electric-tower-silhouette-during-sunset-in-braga-portugal.jpg?s=612x612&w=0&k=20&c=BISNHaG8YORXjCoksZQaMvhrijGHokuZuIdMnmP6mpw="
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            142.0,
+            -36.0
+          ],
+          [
+            141.3,
+            -34.0
+          ]
+        ]
+      }
+    }
+  ]
+}
