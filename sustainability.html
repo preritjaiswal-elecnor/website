@@ -1,0 +1,211 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sustainability — Elecnor Australia</title>
+  <link rel="stylesheet" href="lib/leaflet/dist/leaflet.css" />
+  <link rel="stylesheet" href="assets/css/nav.css" />
+  <style>
+    :root{
+      --surface:#ffffffd0; --text:#111; --text-muted:#555; --elec-orange:#ff9100; --elec-lightblue:#A2BEEE; --elec-panes:#A2BEEE;
+    --ink:#255dc5; --ink2:#001950; --shadow:0 10px 25px rgba(70,49,49,.18); --sdg1: #1b76ff8c; --sdg2: #00095cb9; 
+    }
+    body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,"Noto Sans","Helvetica Neue",sans-serif;background:var(--surface);color:var(--text)}
+
+    /* HERO */
+    .hero{position:relative;min-height:46vh;display:grid;align-items:end;padding:64px 20px 24px;background:
+      linear-gradient(180deg,rgba(0, 180, 126, 0.452),rgba(0, 4, 255, 0.28)),
+      url('https://images.ctfassets.net/oggad6svuzkv/fNLTGYf4Fyd8JQJgE6sXJ/91a95da5e513eebe3e035bb77736fccc/Hero_MB_Sustainability.webp') center/cover no-repeat}
+    .hero__inner{max-width:1100px;margin:0 auto;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.35)}
+    .eyebrow{display:inline-block;padding:.35rem .6rem;border-radius:.5rem;background:rgba(255,255,255,.18);backdrop-filter:blur(2px);font-weight:600}
+    .page-title{font-size:clamp(32px,5vw,56px);margin:10px 0 6px}
+    .lead{font-size:1.1rem;max-width:70ch;margin:0}
+
+    /* Layout helpers */
+    .wrap{max-width:1100px;margin:24px auto 64px;padding:0 20px}
+    .section-title{margin:18px 0 10px;font-size:clamp(22px,3vw,28px)}
+
+    /* Pillars */
+    .pillars{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .pillar{background:var(--elec-panes);border-radius:16px;box-shadow:var(--shadow);padding:16px}
+    .pillar h3{margin:0 0 6px;font-size:18px}
+    .pillar p{margin:0;color:var(--text-muted)}
+
+    /* SDG strip */
+    .sdg-band{background:var(--elec-lightblue);border-radius:16px;box-shadow:var(--shadow);overflow:hidden}
+    .sdg-head{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:linear-gradient(180deg,var(--sdg1),var(--sdg2));color:#ffffff}
+    .sdg-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;padding:12px}
+    .sdg{background:#0e3a7e67;border:1px solid #f0e2c9;border-radius:10px;padding:10px;display:grid;place-items:center}
+    .sdg img{width:100%;height:58px;object-fit:contain}
+
+    /* Policies grid */
+    .policies{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+    .policy{border-radius:16px;overflow:hidden;box-shadow:var(--shadow);background:var(--elec-panes);display:grid;grid-template-rows:140px auto}
+    .policy__img{background:#f6f8fb}
+    .policy__img img{width:100%;height:100%;object-fit:cover;display:block}
+    .policy__body{padding:12px 14px}
+    .policy__body h4{margin:0 0 6px;font-size:16px}
+    .policy__body p{margin:0;color:var(--text-muted);font-size:14px}
+
+    /* KPI cards */
+    .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+    .kpi{background:linear-gradient(180deg,var(--ink),var(--ink2));border-radius:16px;box-shadow:var(--shadow);padding:16px;text-align:center}
+    .kpi__num{font-size:clamp(22px,3.5vw,34px);font-weight:800;color:var(--surface)}
+    .kpi__label{color:var(--surface);font-size:14px}
+
+    /* Accordions */
+    details{background:var(--elec-panes);border-radius:12px;box-shadow:var(--shadow);padding:12px 14px}
+    details+details{margin-top:10px}
+    summary{cursor:pointer;font-weight:700}
+
+    /* CTA */
+    .cta{margin:36px 0;border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}
+    .cta__bar{background:linear-gradient(180deg,var(--ink),var(--ink2));padding:18px;color:#ffffff;display:grid;grid-template-columns:1fr auto;align-items:center}
+    .cta__actions{display:flex;gap:8px}
+    .btn{display:inline-flex;align-items:center;gap:8px;padding:.6rem .9rem;border-radius:.6rem;border:2px solid #fff3;cursor:pointer;text-decoration:none}
+    .btn--light{background:#fff;color:#052a2b;border-color:#fff}
+    .btn--ghost{background:transparent;color:#fff;border-color:#fff}
+
+    @media (max-width:1000px){ .pillars{grid-template-columns:1fr 1fr} .policies{grid-template-columns:1fr 1fr} .kpis{grid-template-columns:1fr 1fr} .sdg-grid{grid-template-columns:repeat(4,1fr)} }
+    @media (max-width:560px){ .pillars{grid-template-columns:1fr} .policies{grid-template-columns:1fr} .kpis{grid-template-columns:1fr 1fr} .sdg-grid{grid-template-columns:repeat(3,1fr)} }
+  </style>
+</head>
+<body>
+  <header class="site-header" role="banner">
+    <div class="main-bar">
+      <a class="logo" href="index.html" aria-label="Elecnor Home">
+        <img src="https://www.elecnor.com.au/storage/media/files/shares/logo-elecnoraustralia.png" alt="Elecnor" />
+      </a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav">
+        <span class="sr-only">Open menu</span>
+        <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+      </button>
+      <nav id="primary-nav" class="primary-nav" aria-label="Primary">
+        <ul class="top-level">
+          <li><a class="top-link" href="about.html">About</a></li>
+          <li class="has-sub">
+            <button class="top-link" type="button" aria-expanded="false" aria-controls="sub-projects">Projects</button>
+            <ul id="sub-projects" class="submenu" role="menu" aria-label="Projects">
+              <li role="none"><a role="menuitem" href="projects-wind.html">Wind</a></li>
+              <li role="none"><a role="menuitem" href="projects-solar.html">Solar</a></li>
+              <li role="none"><a role="menuitem" href="projects-bess.html">BESS</a></li>
+              <li role="none"><a role="menuitem" href="projects-transmission.html">Power Transmission</a></li>
+            </ul>
+          </li>
+          <li><a class="top-link" href="sustainability.html" aria-current="page">Sustainability</a></li>
+          <li><a class="top-link" href="careers.html">Careers</a></li>
+          <li><a class="top-link" href="news.html">News</a></li>
+          <li><a class="top-link" href="contact.html">Contact Us</a></li>
+        </ul>
+        <div class="nav-actions">
+          <a class="search-link" href="search.html" aria-label="Search">
+            <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24"><path d="M10 18a8 8 0 1 1 6.32-3.11L22 20.5l-1.5 1.5-5.68-5.61A8 8 0 0 1 10 18Z" fill="currentColor"/></svg>
+          </a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero" role="banner">
+    <div class="hero__inner">
+      <span class="eyebrow">Sustainability</span>
+      <h1 class="page-title">Our commitment to responsible growth</h1>
+      <p class="lead">We plan, build and connect clean energy and essential infrastructure with safety, environmental stewardship and community value at the core.</p>
+    </div>
+  </section>
+
+  <main class="wrap" role="main">
+    <!-- Pillars -->
+    <h2 class="section-title">Pillars of our approach</h2>
+    <section class="pillars" aria-label="Sustainability pillars">
+      <article class="pillar">
+        <h3>Climate & environment</h3>
+        <p>Designing to avoid, minimise and offset impacts; lowering Scope 1–3 emissions through electrified plant, optimisation and smarter logistics.</p>
+      </article>
+      <article class="pillar">
+        <h3>People & safety</h3>
+        <p>Zero Harm ambition, strong HSE systems, upskilling and wellbeing programs for teams and delivery partners.</p>
+      </article>
+      <article class="pillar">
+        <h3>Communities & governance</h3>
+        <p>Transparent governance, ethical supply chains and local participation so projects create lasting regional benefits.</p>
+      </article>
+    </section>
+
+    <!-- SDGs -->
+    <h2 class="section-title">Working to the UN Sustainable Development Goals</h2>
+    <section class="sdg-band" aria-label="SDGs">
+      <div class="sdg-head"><strong>SDGs we contribute to</strong><span>Governance • Environment • Social</span></div>
+      <div class="sdg-grid">
+        <div class="sdg"><img alt="SDG 7" src="https://www.monash.edu/__data/assets/image/0003/1442757/E_SDG-goals_icons-individual-rgb-07.png"></div>
+        <div class="sdg"><img alt="SDG 9" src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Sustainable_Development_Goal_09Industry.svg/1280px-Sustainable_Development_Goal_09Industry.svg.png"></div>
+        <div class="sdg"><img alt="SDG 11" src="https://wsa-global.org/wp-content/uploads/2019/07/E_SDG-goals_icons-individual-rgb-11.png"></div>
+        <div class="sdg"><img alt="SDG 12" src="https://www.un.org/sustainabledevelopment/wp-content/uploads/2018/05/E_SDG-goals_icons-individual-rgb-12.png"></div>
+        <div class="sdg"><img alt="SDG 13" src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Sustainable_Development_Goal_13Climate.svg/1280px-Sustainable_Development_Goal_13Climate.svg.png"></div>
+        <div class="sdg"><img alt="SDG 17" src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Sustainable_Development_Goal_17Partnerships.svg/1280px-Sustainable_Development_Goal_17Partnerships.svg.png"></div>
+      </div>
+    </section>
+
+    <!-- Policies -->
+    <h2 class="section-title">Policies & statements</h2>
+    <section class="policies" aria-label="Policies">
+      <article class="policy">
+        <div class="policy__img"><img alt="Sustainability policy" src="https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?q=80&w=1600&auto=format&fit=crop"></div>
+        <div class="policy__body"><h4>Group Sustainability Policy</h4><p>Our framework for environmental, social and governance performance.</p></div>
+      </article>
+      <article class="policy">
+        <div class="policy__img"><img alt="Code of conduct" src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=1600&auto=format&fit=crop"></div>
+        <div class="policy__body"><h4>Code of Ethics & Conduct</h4><p>Expectations for all employees, partners and suppliers.</p></div>
+      </article>
+      <article class="policy">
+        <div class="policy__img"><img alt="Human rights" src="https://www.wbcsd.org/wp-content/uploads/2024/01/bp-launches-updated-Human-Rights-Policy_i1140.webp"></div>
+        <div class="policy__body"><h4>Human Rights Policy</h4><p>Respecting human rights across our operations and value chain.</p></div>
+      </article>
+      <article class="policy">
+        <div class="policy__img"><img alt="Anti-corruption" src="https://images.unsplash.com/photo-1523958203904-cdcb402031fd?q=80&w=1600&auto=format&fit=crop"></div>
+        <div class="policy__body"><h4>Anti‑corruption Policy</h4><p>Strong controls and training to prevent bribery and corruption.</p></div>
+      </article>
+    </section>
+
+    <!-- KPIs -->
+    <h2 class="section-title">2025 targets</h2>
+    <section class="kpis" aria-label="Targets">
+      <div class="kpi"><div class="kpi__num">‑15%</div><div class="kpi__label">Scope 1 & 2 emissions vs. 2023</div></div>
+      <div class="kpi"><div class="kpi__num">100%</div><div class="kpi__label">Renewable electricity for offices</div></div>
+      <div class="kpi"><div class="kpi__num">30%</div><div class="kpi__label">Electrified light vehicles</div></div>
+      <div class="kpi"><div class="kpi__num">Zero</div><div class="kpi__label">Class 1 incidents</div></div>
+    </section>
+
+    <!-- Disclosures / details -->
+    <h2 class="section-title">Disclosures & frameworks</h2>
+    <details>
+      <summary>UN Global Compact</summary>
+      <p>We support the Ten Principles on human rights, labour, environment and anti‑corruption and report annually on progress.</p>
+    </details>
+    <details>
+      <summary>TCFD & climate risk</summary>
+      <p>We are aligning governance, strategy, risk management and metrics/targets to the Task Force on Climate‑related Financial Disclosures.</p>
+    </details>
+    <details>
+      <summary>Modern Slavery</summary>
+      <p>We conduct supplier risk screening and require attestations for labour standards and working conditions.</p>
+    </details>
+
+    <!-- CTA -->
+    <section class="cta" aria-label="Call to action">
+      <div class="cta__bar">
+        <h3>Have a question about our ESG approach?</h3>
+        <div class="cta__actions">
+          <a class="btn btn--light" href="contact.html">Contact us</a>
+          <a class="btn btn--ghost" href="news.html">Read latest updates</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="assets/js/nav.js"></script>
+</body>
+</html>

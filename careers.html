@@ -1,0 +1,217 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Careers — Elecnor Australia</title>
+  <link rel="stylesheet" href="lib/leaflet/dist/leaflet.css" />
+  <link rel="stylesheet" href="assets/css/nav.css" />
+  <style>
+    :root{ --surface:#ffffffd0; --elec-panes:#A2BEEE; --text:#111; --text-muted:#555; --ink:#255dc5; --ink2:#001950; --elec-orange:#F37C02; --elec-lightblue:#A2BEEE; --shadow:0 10px 25px rgba(70,49,49,.18); }
+    body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,"Noto Sans","Helvetica Neue",sans-serif;background:var(--surface);color:var(--text)}
+
+    /* HERO */
+    .hero{position:relative;min-height:46vh;display:grid;align-items:end;padding:64px 20px 24px;background:
+      linear-gradient(180deg,rgba(109, 185, 255, 0.253),rgba(255, 149, 149, 0.28)),
+      url('https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=1920&auto=format&fit=crop') center/cover no-repeat}
+    .hero__inner{max-width:1100px;margin:0 auto;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.35)}
+    .eyebrow{display:inline-block;padding:.35rem .6rem;border-radius:.5rem;background:rgba(255,255,255,.18);backdrop-filter:blur(2px);font-weight:600}
+    .page-title{font-size:clamp(32px,5vw,56px);margin:10px 0 6px}
+    .lead{font-size:1.1rem;max-width:70ch;margin:0}
+
+    /* Wrap */
+    .wrap{max-width:1100px;margin:24px auto 64px;padding:0 20px}
+    .section-title{margin:18px 0 10px;font-size:clamp(22px,3vw,28px)}
+
+    /* Why join */
+    .reasons{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .reason{background:var(--elec-panes);border-radius:16px;box-shadow:var(--shadow);padding:16px}
+    .reason h3{margin:0 0 6px;font-size:18px}
+    .reason p{margin:0;color:var(--text-muted)}
+
+    /* Open roles */
+    .roles{display:grid;grid-template-columns:1.2fr .8fr;gap:24px}
+    .list{background:var(--elec-panes);border-radius:16px;box-shadow:var(--shadow);padding:0}
+    .job{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:14px 16px;border-bottom:1px solid #f0e2c9}
+    .job:last-child{border-bottom:0}
+    .job h4{margin:0;font-size:16px}
+    .job small{color:var(--text-muted)}
+    .btn-apply{display:inline-flex;align-items:center;gap:8px;padding:.45rem .7rem;border-radius:.5rem;border:2px solid var(--elec-orange);color:#111;background:#fff;cursor:pointer;text-decoration:none}
+    .btn-apply:hover{background:var(--elec-orange);color:#fff}
+    .aside{background:var(--elec-panes);border-radius:16px;box-shadow:var(--shadow);padding:16px}
+
+    /* Benefits */
+    .benefits{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+    .benefit{background:var(--elec-panes);border-radius:16px;box-shadow:var(--shadow);padding:16px;text-align:center}
+    .benefit h4{margin:8px 0 6px}
+    .benefit p{margin:0;color:var(--text-muted);font-size:14px}
+
+    /* Process */
+    .process{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+    .step{background:var(--elec-panes);border-radius:16px;box-shadow:var(--shadow);padding:16px}
+    .step h4{margin:0 0 6px}
+    .step p{margin:0;color:var(--text-muted)}
+
+    /* FAQs */
+    details{background:var(--elec-panes);border-radius:12px;box-shadow:var(--shadow);padding:12px 14px}
+    details+details{margin-top:10px}
+    summary{cursor:pointer;font-weight:700}
+
+    /* CTA */
+    .cta{margin:36px 0;border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}
+    .cta__bar{background:linear-gradient(180deg,var(--ink),var(--ink2));padding:18px;color:#ffffff;display:grid;grid-template-columns:1fr auto;align-items:center}
+    .cta__actions{display:flex;gap:8px}
+    .btn{display:inline-flex;align-items:center;gap:8px;padding:.6rem .9rem;border-radius:.6rem;border:2px solid #fff3;cursor:pointer;text-decoration:none}
+    .btn--light{background:#fff;color:#052a2b;border-color:#fff}
+    .btn--ghost{background:transparent;color:#fff;border-color:#fff}
+
+    @media (max-width:1000px){ .reasons{grid-template-columns:1fr 1fr} .roles{grid-template-columns:1fr} .benefits{grid-template-columns:1fr 1fr} .process{grid-template-columns:1fr 1fr} }
+    @media (max-width:560px){ .reasons{grid-template-columns:1fr} .benefits{grid-template-columns:1fr} .process{grid-template-columns:1fr} }
+  </style>
+</head>
+<body>
+  <header class="site-header" role="banner">
+    <div class="main-bar">
+      <a class="logo" href="index.html" aria-label="Elecnor Home">
+        <img src="https://www.elecnor.com.au/storage/media/files/shares/logo-elecnoraustralia.png" alt="Elecnor" />
+      </a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav">
+        <span class="sr-only">Open menu</span>
+        <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+      </button>
+      <nav id="primary-nav" class="primary-nav" aria-label="Primary">
+        <ul class="top-level">
+          <li><a class="top-link" href="about.html">About</a></li>
+          <li class="has-sub">
+            <button class="top-link" type="button" aria-expanded="false" aria-controls="sub-projects">Projects</button>
+            <ul id="sub-projects" class="submenu" role="menu" aria-label="Projects">
+              <li role="none"><a role="menuitem" href="projects-wind.html">Wind</a></li>
+              <li role="none"><a role="menuitem" href="projects-solar.html">Solar</a></li>
+              <li role="none"><a role="menuitem" href="projects-bess.html">BESS</a></li>
+              <li role="none"><a role="menuitem" href="projects-transmission.html">Power Transmission</a></li>
+            </ul>
+          </li>
+          <li><a class="top-link" href="sustainability.html">Sustainability</a></li>
+          <li><a class="top-link" href="careers.html" aria-current="page">Careers</a></li>
+          <li><a class="top-link" href="news.html">News</a></li>
+          <li><a class="top-link" href="contact.html">Contact Us</a></li>
+        </ul>
+        <div class="nav-actions">
+          <a class="search-link" href="search.html" aria-label="Search">
+            <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24"><path d="M10 18a8 8 0 1 1 6.32-3.11L22 20.5l-1.5 1.5-5.68-5.61A8 8 0 0 1 10 18Z" fill="currentColor"/></svg>
+          </a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero" role="banner">
+    <div class="hero__inner">
+      <span class="eyebrow">Careers</span>
+      <h1 class="page-title">Build the networks that power tomorrow</h1>
+      <p class="lead">Join project, engineering and field teams delivering transmission, substations, BESS, wind and solar across Australia & New Zealand.</p>
+    </div>
+  </section>
+
+  <main class="wrap" role="main">
+    <!-- Why join us -->
+    <h2 class="section-title">Why join Elecnor Australia</h2>
+    <section class="reasons" aria-label="Reasons">
+      <article class="reason"><h3>Meaningful work</h3><p>Accelerate the energy transition with assets that communities rely on every day.</p></article>
+      <article class="reason"><h3>Grow your career</h3><p>Structured development, mentoring and clear pathways—from graduate roles to leadership.</p></article>
+      <article class="reason"><h3>People first</h3><p>Strong safety culture, flexible arrangements where possible, and genuine team support.</p></article>
+    </section>
+
+    <!-- Open roles (sample placeholders) -->
+    <h2 class="section-title">Current opportunities</h2>
+    <section class="roles" aria-label="Open roles">
+      <div class="list" role="list">
+        <div class="job" role="listitem">
+          <div>
+            <h4>Project Engineer — Transmission</h4>
+            <small>Sydney, NSW • Full‑time</small>
+          </div>
+          <a class="btn-apply" href="mailto:careers@elecnor.com.au?subject=Project%20Engineer%20—%20Transmission">Apply</a>
+        </div>
+        <div class="job" role="listitem">
+          <div>
+            <h4>Substation Commissioning Technician</h4>
+            <small>Melbourne, VIC • Fixed‑term</small>
+          </div>
+          <a class="btn-apply" href="mailto:careers@elecnor.com.au?subject=Substation%20Commissioning%20Technician">Apply</a>
+        </div>
+        <div class="job" role="listitem">
+          <div>
+            <h4>HSE Advisor — Construction</h4>
+            <small>Regional QLD • Full‑time</small>
+          </div>
+          <a class="btn-apply" href="mailto:careers@elecnor.com.au?subject=HSE%20Advisor%20—%20Construction">Apply</a>
+        </div>
+        <div class="job" role="listitem">
+          <div>
+            <h4>Planner / Scheduler</h4>
+            <small>Adelaide, SA • Full‑time</small>
+          </div>
+          <a class="btn-apply" href="mailto:careers@elecnor.com.au?subject=Planner%20Scheduler">Apply</a>
+        </div>
+      </div>
+      <aside class="aside" role="complementary">
+        <h3>Can’t see your role?</h3>
+        <p>We’re always keen to meet talented people for upcoming projects. Send us your CV and a short note about where you create the most impact.</p>
+        <p><a class="btn-apply" href="mailto:careers@elecnor.com.au?subject=Expression%20of%20Interest">Send CV</a></p>
+        <hr style="border:none;border-top:1px solid #f0e2c9;margin:12px 0">
+        <h3>Graduate pathways</h3>
+        <p>Join our graduate program in engineering, construction management, HSE, planning or commercial.</p>
+      </aside>
+    </section>
+
+    <!-- Benefits -->
+    <h2 class="section-title">Benefits & support</h2>
+    <section class="benefits" aria-label="Benefits">
+      <article class="benefit"><h4>Safety & wellbeing</h4><p>Zero Harm mindset, EAP and mental health support.</p></article>
+      <article class="benefit"><h4>Learning</h4><p>Certifications, licenses and leadership development.</p></article>
+      <article class="benefit"><h4>Flexibility</h4><p>Hybrid options for eligible roles and project needs.</p></article>
+      <article class="benefit"><h4>Recognition</h4><p>Performance rewards and internal mobility.</p></article>
+    </section>
+
+    <!-- Hiring process -->
+    <h2 class="section-title">Our hiring process</h2>
+    <section class="process" aria-label="Process">
+      <article class="step"><h4>1. Apply</h4><p>Send your CV and a brief note about your experience and availability.</p></article>
+      <article class="step"><h4>2. Conversation</h4><p>Meet our recruiter or hiring manager to align on the role and team.</p></article>
+      <article class="step"><h4>3. Technical</h4><p>Discuss relevant projects, safety approach, and problem‑solving methods.</p></article>
+      <article class="step"><h4>4. Offer</h4><p>We agree on details and plan your onboarding for project or office start.</p></article>
+    </section>
+
+    <!-- FAQs -->
+    <h2 class="section-title">FAQs</h2>
+    <details>
+      <summary>Do you support relocation?</summary>
+      <p>For specific roles we may assist with relocation—this will be discussed during interviews.</p>
+    </details>
+    <details>
+      <summary>What are typical rosters on site?</summary>
+      <p>Rosters vary by project. We aim to balance project needs with wellbeing and family time.</p>
+    </details>
+    <details>
+      <summary>How can I apply if I don’t see my role?</summary>
+      <p>Send an expression of interest to the email above with your ideal role and region.</p>
+    </details>
+
+    <!-- CTA -->
+    <section class="cta" aria-label="Call to action">
+      <div class="cta__bar">
+        <h3>Ready to power Australia’s energy transition?</h3>
+        <div class="cta__actions">
+          <a class="btn btn--light" href="mailto:careers@elecnor.com.au?subject=Careers%20enquiry">Email our careers team</a>
+          <a class="btn btn--ghost" href="news.html">See what we’re building</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="assets/js/nav.js"></script>
+</body>
+</html>

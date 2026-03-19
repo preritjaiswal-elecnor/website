@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Power Transmission — Elecnor Australia</title>
+  <link rel="stylesheet" href="assets/css/nav.css" />
+  <style>
+    :root{ --surface:#ffffffd0; --elec-panes:#A2BEEE; --text:#111; --text-muted:#555; --ink:#255dc5; --ink2:#001950; --elec-orange:#ff8800; --elec-lightblue:#A2BEEE; --shadow:0 10px 25px rgba(70,49,49,.18); }
+    body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,"Noto Sans","Helvetica Neue",sans-serif;background:var(--surface);color:var(--text)}
+
+    /* HERO */
+    .tx-hero{position:relative;min-height:46vh;display:grid;align-items:end;padding:64px 20px 24px;background:
+      linear-gradient(180deg,rgba(255, 255, 255, 0.103),rgba(0, 0, 0, 0.486)),
+      /* Replace with your transmission image later */
+      url('https://hackaday.com/wp-content/uploads/2017/01/grid.jpg') center/cover no-repeat}
+    .tx-hero__inner{max-width:1100px;margin:0 auto;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.35)}
+    .eyebrow{display:inline-block;padding:.35rem .6rem;border-radius:.5rem;background:rgba(255,255,255,.18);backdrop-filter:blur(2px);font-weight:600}
+    .page-title{font-size:clamp(32px,5vw,56px);margin:10px 0 6px}
+    .lead{font-size:1.05rem;max-width:70ch;margin:0}
+
+    /* Breadcrumbs */
+    .breadcrumbs{max-width:1100px;margin:18px auto 0;padding:0 20px;color:#333}
+    .breadcrumbs a{color:#333;text-decoration:none}
+
+    /* Toolbar */
+    .toolbar-wrap{max-width:1100px;margin:18px auto 0;padding:0 20px}
+    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    .stat{background:#fff;border:1px solid #e8ebef;border-radius:12px;box-shadow:var(--shadow);padding:12px 14px}
+    .stat__k{font-size:13px;color:#334}
+    .stat__v{font-weight:800;color:#0b1a34}
+
+    .filters{display:grid;grid-template-columns:1fr auto;gap:12px;margin-top:10px}
+    .search{display:flex;align-items:center;background:#fff;border:1px solid #e8ebef;border-radius:999px;padding:8px 12px;box-shadow:0 4px 18px rgba(0,0,0,.05)}
+    .search input{border:0;outline:0;width:100%;font-size:15px}
+    .chips{display:flex;flex-wrap:wrap;gap:8px}
+    .chip{border:1px solid #d7dbe6;background:#fff;color:#123d99;padding:8px 12px;border-radius:999px;font-weight:600;cursor:pointer;transition:.18s}
+    .chip.is-active,.chip:hover{background:var(--elec-orange);border-color:var(--elec-orange);color:#fff}
+
+    /* Page grid */
+    .page{max-width:1100px;margin:18px auto 64px;padding:0 20px}
+
+    /* Project cards */
+    .proj{display:grid;grid-template-columns:1.05fr .95fr;gap:18px;align-items:center;background:#fff;border:1px solid #e6eaf2;border-radius:16px;box-shadow:var(--shadow);padding:14px;margin:16px 0}
+    .proj:nth-child(even){grid-template-columns:.95fr 1.05fr}
+    .proj__media{position:relative;border-radius:12px;overflow:hidden}
+    .proj__media img{width:100%;height:260px;object-fit:cover;display:block;transition:transform .35s ease}
+    .proj:hover .proj__media img{transform:scale(1.02)}
+    .proj__tag{position:absolute;left:10px;top:10px;background:rgba(0,0,0,.6);color:#fff;padding:6px 10px;border-radius:999px;font-size:13px}
+    .proj h3{margin:4px 0 6px;font-size:24px;color:#0b1a34}
+    .proj .meta{margin:0 0 10px;color:#2a3a4d}
+    .badges{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 10px}
+    .badge{background:#0b1a34;color:#fff;border-radius:999px;padding:6px 10px;font-size:12.5px}
+    .proj p{margin:8px 0 0;color:#2a3a4d;line-height:1.6}
+    .cta-row{display:flex;gap:8px;margin-top:12px}
+    .btn{display:inline-flex;align-items:center;gap:8px;padding:.6rem .9rem;border-radius:.6rem;border:1px solid #0b1a34;background:#0b1a34;color:#fff;text-decoration:none;font-weight:600}
+    .btn--ghost{background:#fff;color:#0b1a34;border-color:#d2d8e7}
+
+    @media (max-width:1000px){
+      .stats{grid-template-columns:1fr 1fr 1fr}
+      .proj{grid-template-columns:1fr}
+    }
+    @media (max-width:560px){
+      .stats{grid-template-columns:1fr 1fr}
+    }
+
+    /* Reveal */
+    .reveal{opacity:0;transform:translateY(12px);transition:opacity .5s ease, transform .5s ease}
+    .reveal.is-in{opacity:1;transform:none}
+    @media (prefers-reduced-motion: reduce){.reveal{transition:none!important;transform:none!important;opacity:1!important}}
+  </style>
+</head>
+<body>
+  <header class="site-header" role="banner">
+    <div class="main-bar">
+      <a class="logo" href="index.html" aria-label="Elecnor Home">
+        <img src="https://www.elecnor.com.au/storage/media/files/shares/logo-elecnoraustralia.png" alt="Elecnor" />
+      </a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav">
+        <span class="sr-only">Open menu</span>
+        <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+      </button>
+      <nav id="primary-nav" class="primary-nav" aria-label="Primary">
+        <ul class="top-level">
+          <li><a class="top-link" href="about.html">About</a></li>
+          <li class="has-sub">
+            <button class="top-link" type="button" aria-expanded="true" aria-controls="sub-projects">Projects</button>
+            <ul id="sub-projects" class="submenu" role="menu" aria-label="Projects">
+              <li role="none"><a role="menuitem" href="projects-wind.html">Wind</a></li>
+              <li role="none"><a role="menuitem" href="projects-solar.html">Solar</a></li>
+              <li role="none"><a role="menuitem" href="projects-bess.html">BESS</a></li>
+              <li role="none"><a role="menuitem" class="is-current" href="projects-transmission.html" aria-current="page">Power Transmission</a></li>
+            </ul>
+          </li>
+          <li><a class="top-link" href="sustainability.html">Sustainability</a></li>
+          <li><a class="top-link" href="careers.html">Careers</a></li>
+          <li><a class="top-link" href="news.html">News</a></li>
+          <li><a class="top-link" href="contact.html">Contact Us</a></li>
+        </ul>
+        <div class="nav-actions">
+          <a class="search-link" href="search.html" aria-label="Search">
+            <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24"><path d="M10 18a8 8 0 1 1 6.32-3.11L22 20.5l-1.5 1.5-5.68-5.61A8 8 0 0 1 10 18Z" fill="currentColor"/></svg>
+          </a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="tx-hero" role="banner">
+    <div class="tx-hero__inner">
+      <span class="eyebrow">Projects — Power Transmission</span>
+      <h1 class="page-title">High‑voltage transmission—safe delivery at scale</h1>
+      <p class="lead">End‑to‑end packages for lattice and monopole lines, 132–330 kV substations, line uprates and interconnector works, with full grid testing and commissioning.</p>
+    </div>
+  </section>
+
+  <nav class="breadcrumbs" aria-label="Breadcrumb">
+    <a href="index.html">Home</a> › <span>Projects — Power Transmission</span>
+  </nav>
+
+  <!-- Toolbar cards -->
+  <div class="toolbar-wrap" role="region" aria-label="Key figures and filters">
+    <div class="stats" aria-label="Key stats">
+      <div class="stat"><div class="stat__k">Transmission projects delivered / in delivery</div><div class="stat__v" id="statProjects">—</div></div>
+      <div class="stat"><div class="stat__k">Largest scope (indicative)</div><div class="stat__v">Multi‑section 330 kV corridors</div></div>
+      <div class="stat"><div class="stat__k">Substation voltage range (kV)</div><div class="stat__v">132 / 220 / 275 / 330</div></div>
+    </div>
+    <div class="filters">
+      <label class="search" aria-label="Search projects">
+        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24"><path d="M10 18a8 8 0 1 1 6.32-3.11L22 20.5l-1.5 1.5-5.68-5.61A8 8 0 0 1 10 18Z" fill="#123d99"/></svg>
+        <input id="searchInput" type="search" placeholder="Search by project or state…"/>
+      </label>
+      <div class="chips" role="tablist" aria-label="Filter by state">
+        <button class="chip is-active" data-state="all" role="tab" aria-selected="true">All</button>
+        <button class="chip" data-state="NSW" role="tab">NSW</button>
+        <button class="chip" data-state="SA" role="tab">SA</button>
+        <button class="chip" data-state="QLD" role="tab">QLD</button>
+        <button class="chip" data-state="VIC" role="tab">VIC</button>
+        <button class="chip" data-state="ACT" role="tab">ACT</button>
+      </div>
+    </div>
+  </div>
+
+  <main class="page" id="page" role="main"></main>
+
+  <script>
+    // Transmission projects — content adapted from your provided screenshot
+    const PROJECTS = [
+      {
+        slug:'project-energyconnect-nsw',
+        title:'Project EnergyConnect (PEC), NSW',
+        state:'NSW',
+        // Replace this hero with your own image
+        hero:'https://images.squarespace-cdn.com/content/v1/59ae4a2a6f4ca38d47990cd8/1643254756767-PFAOK6IZJA8ZDSV938VV/energyconnect+info+sessions.png',
+        badges:['330 kV transmission lines','Substation works','Testing & commissioning'],
+        copy:`Project EnergyConnect (PEC) is a major interconnector program. Elecnor’s participation includes transmission line construction packages and associated substation works, with interface management, electrical testing and commissioning to enable reliable transfer capacity.`,
+        links:[
+          {label:'Project gallery',href:'#'},
+          {label:'Download factsheet',href:'#',ghost:true}
+        ]
+      }
+    ];
+
+    const page=document.getElementById('page');
+    function render(list){
+      page.innerHTML='';
+      list.forEach((p,i)=>{
+        const el=document.createElement('section');
+        el.className='proj reveal';
+        el.id=p.slug;
+        el.innerHTML=`
+          <div class="proj__media">
+            <img src="${p.hero}" alt="${p.title}" loading="lazy"/>
+            <span class="proj__tag">Transmission</span>
+          </div>
+          <div>
+            <h3>${p.title}</h3>
+            <p class="meta">State: <strong>${p.state}</strong></p>
+            <div class="badges">${(p.badges||[]).map(b=>`<span class="badge">${b}</span>`).join('')}</div>
+            <p>${p.copy}</p>
+            <div class="cta-row">${(p.links||[]).map(l=>`<a class="btn ${l.ghost?'btn--ghost':''}" href="${l.href}">${l.label}</a>`).join('')}</div>
+          </div>`;
+        page.appendChild(el);
+      });
+      const stat=document.getElementById('statProjects');
+      if(stat) stat.textContent=String(list.length);
+      observe();
+    }
+
+    // search + filter
+    const chips=[...document.querySelectorAll('.chip')];
+    let activeState='all';
+    function apply(){
+      const q=(document.getElementById('searchInput').value||'').toLowerCase().trim();
+      const out=PROJECTS.filter(p=>{
+        const s=activeState==='all'||p.state===activeState;
+        const hay=(p.title+' '+p.state+' '+(p.badges||[]).join(' ')+' '+p.copy).toLowerCase();
+        return s && (!q || hay.includes(q));
+      });
+      render(out);
+    }
+    document.getElementById('searchInput').addEventListener('input',apply);
+    chips.forEach(c=>c.addEventListener('click',()=>{chips.forEach(x=>x.classList.remove('is-active'));c.classList.add('is-active');activeState=c.dataset.state;apply();}));
+
+    // reveal
+    let io;
+    function observe(){
+      if(io) io.disconnect();
+      io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting) e.target.classList.add('is-in');});},{threshold:.18});
+      document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+    }
+
+    // initial render
+    render(PROJECTS);
+  </script>
+
+  <script src="assets/js/nav.js"></script>
+</body>
+</html>

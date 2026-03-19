@@ -1,0 +1,209 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>News — Elecnor Australia</title>
+  <link rel="stylesheet" href="lib/leaflet/dist/leaflet.css" />
+  <link rel="stylesheet" href="assets/css/nav.css" />
+  <style>
+    :root{ --surface:#ffffffd0; --elec-panes:#A2BEEE; --text:#111; --text-muted:#555; --ink:#255dc5; --ink2:#001950; --elec-orange:#F37C02; --elec-lightblue:#A2BEEE; --shadow:0 10px 25px rgba(70,49,49,.18); }
+    body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,"Noto Sans","Helvetica Neue",sans-serif;background:var(--surface);color:var(--text)}
+
+    /* HERO */
+    .hero{position:relative;min-height:42vh;display:grid;align-items:end;padding:64px 20px 24px;background:
+      linear-gradient(180deg,rgba(0,0,0,.00),rgba(0,0,0,.28)),
+      url('https://images.squarespace-cdn.com/content/v1/59ae4a2a6f4ca38d47990cd8/45ef749c-7a5b-405e-b360-0bd44adbcfa8/Elecnor+Australia+-+Facebook+Photo.jpg?format=1500w') center/cover no-repeat}
+    .hero__inner{max-width:1100px;margin:0 auto;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.35)}
+    .eyebrow{display:inline-block;padding:.35rem .6rem;border-radius:.5rem;background:rgba(255,255,255,.18);backdrop-filter:blur(2px);font-weight:600}
+    .page-title{font-size:clamp(32px,5vw,56px);margin:10px 0 6px}
+    .lead{font-size:1.05rem;max-width:70ch;margin:0}
+
+    /* Layout */
+    .wrap{max-width:1100px;margin:24px auto 64px;padding:0 20px}
+    .toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+    .chip{display:inline-flex;align-items:center;gap:6px;padding:.45rem .7rem;border-radius:999px;border:1px solid #f0e2c9;background:#fff;color:#111;cursor:pointer}
+    .chip.is-active{background:var(--elec-orange);color:#fff;border-color:var(--elec-orange)}
+    .search{margin-left:auto;display:flex;align-items:center;gap:6px;background:#fff;border:1px solid #f0e2c9;border-radius:999px;padding:.3rem .5rem}
+    .search input{border:0;outline:0;background:transparent;padding:.35rem .25rem;min-width:200px}
+
+    /* Grid */
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .card{background:var(--elec-panes);border-radius:16px;box-shadow:var(--shadow);overflow:hidden;display:grid;grid-template-rows:160px 1fr auto}
+    .card__img{background:#f6f8fb}
+    .card__img img{width:100%;height:100%;object-fit:cover;display:block}
+    .card__body{padding:12px 14px}
+    .card__kicker{font-size:.8rem;color:#666;margin:0 0 4px}
+    .card__title{margin:0 0 6px;font-size:18px}
+    .card__meta{color:#777;font-size:13px;margin:0}
+    .card__footer{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-top:1px solid #f0e2c9}
+    .card__link{color:#111;text-decoration:none;font-weight:600}
+
+    /* Featured row */
+    .featured{display:grid;grid-template-columns:1.4fr .6fr;gap:16px;margin:18px 0}
+    .feature{background:var(--elec-panes);border-radius:16px;box-shadow:var(--shadow);overflow:hidden;display:grid;grid-template-rows:220px auto}
+    .feature__img img{width:100%;height:100%;object-fit:cover;display:block}
+    .feature__body{padding:14px}
+    .feature__title{margin:4px 0 6px;font-size:22px}
+    .feature__text{margin:0;color:#555}
+
+    /* List */
+    .list{margin:22px 0 0;background:var(--elec-panes);border-radius:16px;box-shadow:var(--shadow)}
+    .row{display:grid;grid-template-columns:120px 1fr auto;gap:12px;align-items:center;padding:12px 14px;border-bottom:1px solid #f0e2c9}
+    .row:last-child{border-bottom:0}
+    .row time{color:#777;font-size:13px}
+    .btn{display:inline-flex;align-items:center;gap:8px;padding:.45rem .7rem;border-radius:.5rem;border:2px solid var(--elec-orange);color:#111;background:#fff;cursor:pointer;text-decoration:none}
+    .btn:hover{background:var(--elec-orange);color:#fff}
+
+    /* Pagination */
+    .pagination{display:flex;gap:8px;justify-content:center;margin:18px 0 0}
+    .page{padding:.4rem .7rem;border-radius:.5rem;border:1px solid #f0e2c9;background:#fff;cursor:pointer}
+    .page.is-active{background:var(--elec-orange);color:#fff;border-color:var(--elec-orange)}
+
+    @media (max-width:1000px){ .grid{grid-template-columns:1fr 1fr} .featured{grid-template-columns:1fr} .row{grid-template-columns:1fr;gap:6px;text-align:left} .search{margin-left:0} }
+    @media (max-width:560px){ .grid{grid-template-columns:1fr} }
+  </style>
+</head>
+<body>
+  <header class="site-header" role="banner">
+    <div class="main-bar">
+      <a class="logo" href="index.html" aria-label="Elecnor Home">
+        <img src="https://www.elecnor.com.au/storage/media/files/shares/logo-elecnoraustralia.png" alt="Elecnor" />
+      </a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav">
+        <span class="sr-only">Open menu</span>
+        <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+      </button>
+      <nav id="primary-nav" class="primary-nav" aria-label="Primary">
+        <ul class="top-level">
+          <li><a class="top-link" href="about.html">About</a></li>
+          <li class="has-sub">
+            <button class="top-link" type="button" aria-expanded="false" aria-controls="sub-projects">Projects</button>
+            <ul id="sub-projects" class="submenu" role="menu" aria-label="Projects">
+              <li role="none"><a role="menuitem" href="projects-wind.html">Wind</a></li>
+              <li role="none"><a role="menuitem" href="projects-solar.html">Solar</a></li>
+              <li role="none"><a role="menuitem" href="projects-bess.html">BESS</a></li>
+              <li role="none"><a role="menuitem" href="projects-transmission.html">Power Transmission</a></li>
+            </ul>
+          </li>
+          <li><a class="top-link" href="sustainability.html">Sustainability</a></li>
+          <li><a class="top-link" href="careers.html">Careers</a></li>
+          <li><a class="top-link" href="news.html" aria-current="page">News</a></li>
+          <li><a class="top-link" href="contact.html">Contact Us</a></li>
+        </ul>
+        <div class="nav-actions">
+          <a class="search-link" href="search.html" aria-label="Search">
+            <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24"><path d="M10 18a8 8 0 1 1 6.32-3.11L22 20.5l-1.5 1.5-5.68-5.61A8 8 0 0 1 10 18Z" fill="currentColor"/></svg>
+          </a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero" role="banner">
+    <div class="hero__inner">
+      <span class="eyebrow">News & Updates</span>
+      <h1 class="page-title">Latest from Elecnor Australia</h1>
+      <p class="lead">Project milestones, workforce stories and insights from our teams building Australia’s energy transition.</p>
+    </div>
+  </section>
+
+  <main class="wrap" role="main">
+    <!-- Toolbar -->
+    <div class="toolbar" role="toolbar" aria-label="Filters">
+      <button class="chip is-active" type="button">All</button>
+      <button class="chip" type="button">Projects</button>
+      <button class="chip" type="button">People</button>
+      <button class="chip" type="button">ESG</button>
+      <button class="chip" type="button">Press</button>
+      <label class="search" aria-label="Search news">
+        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 18a8 8 0 1 1 6.32-3.11L22 20.5l-1.5 1.5-5.68-5.61A8 8 0 0 1 10 18Z" fill="#777"/></svg>
+        <input type="search" placeholder="Search news..." aria-label="Search" />
+      </label>
+    </div>
+
+    <!-- Featured -->
+    <section class="featured" aria-label="Featured stories">
+      <article class="feature">
+        <div class="feature__img"><img alt="Aerial of transmission site at dusk" src="https://esdnews.com.au/wp-content/uploads/2023/04/EnergyConnect-Buronga.jpg"></div>
+        <div class="feature__body">
+          <p class="card__kicker">PROJECTS • Feb 2026</p>
+          <h2 class="feature__title">EnergyConnect milestone: major works completed at Buronga</h2>
+          <p class="feature__text">Crews safely completed a key construction phase enabling the next stage of commissioning on the interconnector.</p>
+        </div>
+      </article>
+      <article class="feature">
+        <div class="feature__img"><img alt="Substation control room" src="https://assets.ratedpower.com/1746437554-aerial-view-electrical-substation-blue-sky.jpg?auto=format&dpr=0.21&w=6240"></div>
+        <div class="feature__body">
+          <p class="card__kicker">PRESS • Feb 2026</p>
+          <h2 class="feature__title">Elecnor awarded substation upgrade to support new BESS capacity</h2>
+          <p class="feature__text">The upgrade strengthens grid reliability and unlocks more renewable generation in the region.</p>
+        </div>
+      </article>
+    </section>
+
+    <!-- Grid of posts -->
+    <section class="grid" aria-label="News grid">
+      <article class="card">
+        <div class="card__img"><img alt="Wind farm" src="https://utilitymagazine.com.au/wp-content/uploads/2023/07/Rangebank-BESS-Render-scaled-e1690525116414.jpeg"></div>
+        <div class="card__body">
+          <p class="card__kicker">PROJECTS • Jan 2026</p>
+          <h3 class="card__title">Pine Lodge Terminal Station energised</h3>
+          <p class="card__meta">Victoria • Transmission & BESS</p>
+        </div>
+        <div class="card__footer"><a class="card__link" href="#">Read more</a><time datetime="2026-01-18">18 Jan 2026</time></div>
+      </article>
+      <article class="card">
+        <div class="card__img"><img alt="Battery site" src="https://www.sunteckindia.com/blog/isystem/wp-content/uploads/2023/10/Innovative-approaches-to-improve-waste-reduction-and-sustainability-in-India-25-10-23.webp"></div>
+        <div class="card__body">
+          <p class="card__kicker">ESG • Dec 2025</p>
+          <h3 class="card__title">Recycling and reuse program expands across projects</h3>
+          <p class="card__meta">Circular economy • Construction</p>
+        </div>
+        <div class="card__footer"><a class="card__link" href="#">Read more</a><time datetime="2025-12-05">5 Dec 2025</time></div>
+      </article>
+      <article class="card">
+        <div class="card__img"><img alt="Safety briefing" src="https://media.licdn.com/dms/image/v2/D5610AQEkCZgTtjQf_Q/image-shrink_800/B56ZxuQt2bIgAg-/0/1771376402361?e=2147483647&v=beta&t=Dw3fwuQKz92RsgzXyIvhLbBT3KsgHwC_8mQDt-BYJ_I"></div>
+        <div class="card__body">
+          <p class="card__kicker">PEOPLE • Nov 2025</p>
+          <h3 class="card__title">Apprentices graduate to lines crews</h3>
+          <p class="card__meta">Development • Training</p>
+        </div>
+        <div class="card__footer"><a class="card__link" href="#">Read more</a><time datetime="2025-11-20">20 Nov 2025</time></div>
+      </article>
+    </section>
+
+    <!-- Press releases list -->
+    <section class="list" aria-label="Press releases">
+      <div class="row">
+        <time datetime="2026-02-01">01 Feb 2026</time>
+        <div><strong>Contract award:</strong> Substation upgrade to enable new BESS capacity</div>
+        <a class="btn" href="#">Open</a>
+      </div>
+      <div class="row">
+        <time datetime="2025-12-15">15 Dec 2025</time>
+        <div><strong>Partnership:</strong> Local training initiative expands to regional campuses</div>
+        <a class="btn" href="#">Open</a>
+      </div>
+      <div class="row">
+        <time datetime="2025-10-28">28 Oct 2025</time>
+        <div><strong>Completion:</strong> 220kV line section safely commissioned ahead of schedule</div>
+        <a class="btn" href="#">Open</a>
+      </div>
+    </section>
+
+    <!-- Pagination -->
+    <nav class="pagination" aria-label="Pagination">
+      <button class="page" aria-label="Previous">‹</button>
+      <button class="page is-active" aria-current="page">1</button>
+      <button class="page">2</button>
+      <button class="page">3</button>
+      <button class="page" aria-label="Next">›</button>
+    </nav>
+  </main>
+
+  <script src="assets/js/nav.js"></script>
+</body>
+</html>

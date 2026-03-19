@@ -1,0 +1,653 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Elecnor — Hero Video + Flashcards + HUD + Map</title>
+  <link rel="stylesheet" href="lib/leaflet/dist/leaflet.css" />
+  <link rel="stylesheet" href="assets/css/nav.css" />
+  <style>
+    :root{
+      --elec-orange:#F37C02; --elec-lightblue:#A2BEEE; --text:#111111; --text-muted:#555;
+      --elec-panes:#A2BEEE; --pin-hover-tint: rgba(255, 128, 0, 0.35);
+      --surface:#ffffffd0; --track:#e8ebef; --shadow:0 10px 25px rgba(70,49,49,.25);
+      --radius-card:16px; --card-w-desktop:600px; --card-w-tablet:380px; --card-padding:16px;
+      --slide-dur:280ms; --slide-ease:cubic-bezier(0.22,1,0.36,1); --autoplay-interval:4500;
+      --brand-logo-w:220px; --card-height:630px; --line:#001986;
+      --hud-edge:var(--elec-lightblue); --hud-glow:rgba(0, 0, 0, 0.562); --screen-ar:16/9;
+      --elec-navy:#282694bd; --elec-navy-900:#003a70;
+      --panel-w-desktop:820px; --panel-h-desktop:560px; --panel-w-tablet:90vw; --panel-h-tablet:460px;
+      --card-w:560px; --card-h:520px; --card-img-h:70%;
+    }
+    body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,"Noto Sans","Helvetica Neue",sans-serif;background:var(--surface);color:var(--text)}
+
+    /* ===== HERO + FLASHCARDS (VIDEO) ===== */
+    .hero{position:relative;min-height:70vh;display:grid;align-items:center;padding:64px 24px;overflow:hidden}
+    .hero__video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;background:#000}
+    .hero::after{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;
+      background:linear-gradient(180deg,rgba(255, 255, 255, 0),rgba(255, 187, 0, 0));}
+    .hero__content{max-width:720px;color:#fff;z-index:1;text-shadow:0 2px 8px rgba(0,0,0,.18)}
+    .hero h1{font-size:clamp(34px,6vw,84px);line-height:1.03;margin:0 0 12px}
+    .hero p{font-size:clamp(16px,2vw,20px);margin:0 0 24px;opacity:.9}
+
+    .flashnews{position:absolute;right:32px;top:50%;transform:translateY(-50%);z-index:2;width:var(--card-w-desktop);max-width:92vw;pointer-events:none}
+    .flashnews__deck{position:relative;width:100%;height:var(--card-height);} 
+    .flashnews__card{position:absolute;inset:0;background:var(--elec-panes);border-radius:var(--radius-card);box-shadow:var(--shadow);
+      overflow:hidden;display:grid;grid-template-rows:auto 1fr auto;opacity:0;transform:translateX(12px) scale(.98);
+      transition:transform var(--slide-dur) var(--slide-ease),opacity var(--slide-dur) var(--slide-ease);pointer-events:none}
+    .flashnews__card.is-active{opacity:1;transform:translateX(0) scale(1);pointer-events:auto}
+    .flashnews__imgwrap{aspect-ratio:16/9;overflow:hidden}
+    .flashnews__imgwrap img{width:100%;height:100%;object-fit:cover;display:block}
+    .flashnews__body{padding:calc(var(--card-padding) + 2px) var(--card-padding);display:grid;align-content:start;gap:10px;min-height:120px}
+    .flashnews__title{font-size:20px;line-height:1.25;margin:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    .flashnews__summary{font-size:15px;line-height:1.5;color:var(--text-muted);margin:0;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+    .flashnews__footer{display:grid;grid-template-columns:1fr auto;align-items:center;gap:12px;padding:8px var(--card-padding) var(--card-padding)}
+    .progress{position:relative;block-size:6px;background:var(--track);border-radius:999px;overflow:hidden}
+    .progress__fill{inline-size:0%;block-size:100%;background:var(--elec-orange)}
+    .footer-nav{display:inline-flex;gap:8px}
+    .footer-btn{inline-size:44px;block-size:44px;border-radius:999px;border:2px solid var(--elec-orange);background:#fff;color:#111;
+      display:grid;place-items:center;cursor:pointer;box-shadow:var(--shadow);transition:background 160ms ease,color 160ms ease,border-color 160ms ease}
+    .footer-btn:hover,.footer-btn.is-flash{background:var(--elec-orange);color:#ffffff;border-color:var(--elec-orange)}
+    .footer-btn:hover svg path,.footer-btn.is-flash svg path{stroke:#fff}
+    .footer-btn:focus-visible{outline:3px solid var(--elec-lightblue);outline-offset:2px}
+    .dots{display:flex;gap:8px;padding:10px var(--card-padding) 0;align-items:center;justify-content:center}
+    .dot{inline-size:8px;block-size:8px;border-radius:999px;background:#c8ced6}
+    .dot.is-active{background:var(--elec-orange);transform:scale(1.1)}
+    @media (max-width:1023px){.flashnews{width:var(--card-w-tablet);right:24px}}
+    @media (max-width:767px){.hero{padding-bottom:420px}.flashnews{position:static;transform:none;margin:16px auto 0;width:min(520px,92vw)}}
+
+    /* ===== HUD ===== */
+    .hud-section{position:relative;padding:64px 20px 96px;}
+    .hud-section__inner{max-width:1200px;margin:0 auto;position:relative;z-index:2}
+    .hud-title{margin:0 0 18px;text-align:left;color:#123d99;font-size:clamp(18px,10vw,12px);text-shadow:0 7px 9px rgba(0,0,0,.2)}
+
+    /* Left-aligned HUB + right-side description card */
+    .hud-layout{display:grid;grid-template-columns: 1.35fr .9fr;gap:24px;align-items:start}
+    .hud-tv{width:100%;aspect-ratio:var(--screen-ar);position:relative;filter:drop-shadow(0 16px 42px rgba(0, 0, 0, 0.712))}
+    .hud-frame{position:absolute;inset:0;border-radius:18px;background:linear-gradient(180deg,#ff7f17a8 0%,#092677d2 100%);
+      border:1.5px solid var(--hud-edge);box-shadow:0 0 0 1px rgba(0,0,0,.25) inset,0 12px 36px rgba(0,0,0,.55)}
+    .bezel{position:absolute;inset:14px;border-radius:14px;border:1px solid rgba(0,0,0,.075);box-shadow:0 0 22px var(--hud-glow) inset}
+    .screen{position:absolute;left:26px;right:26px;top:26px;bottom:26px;border-radius:12px;overflow:hidden;background:#000;box-shadow:0 0 0 1px rgba(0,0,0,.25) inset}
+    .screen video{width:100%;height:100%;object-fit:contain;background:#000}
+    .scanlines{position:absolute;inset:0;pointer-events:none;background-image:repeating-linear-gradient(to bottom,rgba(255,255,255,.03) 0px,rgba(255,255,255,.03) 1px,transparent 2px,transparent 3px);mix-blend-mode:soft-light;opacity:.35}
+
+    .desc-card{background:var(--elec-panes);border-radius:14px;box-shadow:var(--shadow);padding:16px 16px 18px;min-height:92%;display:grid;align-content:start}
+    .desc-card h3{margin:0 0 8px;font-size:20px;line-height:1.25}
+    .desc-card p{margin:0 0 10px;color:#2a3a4d;line-height:1.55}
+
+    /* Featured flip cards */ 
+    .featured{margin-top:22px}
+    .featured__title{margin:0 0 10px;font-size:18px;color:#123d99}
+    .featured-cards{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))} 
+
+    .flipcard{position:relative;display:block;perspective:1000px;text-decoration:none;color:inherit}
+    .flipcard__inner{position:relative;width:100%;height:0;padding-bottom:62%;transform-style:preserve-3d;transition:transform .6s var(--slide-ease)}
+    .flipcard:focus .flipcard__inner,.flipcard:hover .flipcard__inner{transform:rotateY(180deg)}
+
+    .flipcard__face{position:absolute;inset:0;border-radius:14px;overflow:hidden;backface-visibility:hidden;box-shadow:var(--shadow);background:#fff}
+    .flipcard__front{display:grid}
+    .flipcard__front img{width:100%;height:100%;object-fit:cover;display:block}
+    .flipcard__label{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(180deg,rgba(0,0,0,.0),rgba(0,0,0,.55));color:#fff;padding:10px 12px;font-weight:600;font-size:15px}
+
+    .flipcard__back{transform:rotateY(180deg);display:grid;grid-template-rows:1fr auto;align-content:stretch;padding:14px;background:#0b1a34;color:#fff}
+    .flipcard__back h4{margin:0 0 6px;font-size:18px;line-height:1.25}
+    .flipcard__back p{margin:0;color:#cfe0ff;font-size:14px;line-height:1.5}
+    .flipcard__arrow{display:inline-grid;place-items:center;width:36px;height:36px;border-radius:999px;background:var(--elec-orange);color:#fff;font-size:18px;margin-top:12px;justify-self:end}
+
+    @media (max-width:1023px){
+      .hud-layout{grid-template-columns:1fr;gap:18px}
+    }
+
+    /* >>> Animated powerline background (RESTORED) <<< */
+    .grid-anim{position:absolute;inset:0;z-index:1;pointer-events:none;mix-blend-mode:soft-light}
+    .grid-anim svg{width:100%;height:100%;display:block}
+    .wire{stroke:var(--elec-lightblue);stroke-width:2;fill:none;opacity:.7;stroke-dasharray:6 10;animation:flow 4s linear infinite}
+    .wire2{stroke:#000;stroke-width:2;fill:none;opacity:.55;stroke-dasharray:4 12;animation:flow 6s linear infinite reverse}
+    .tower{stroke:rgba(11,26,52,.7);stroke-width:2;fill:rgba(11,26,52,.15)}
+    .node{fill:#000;opacity:.8;filter:drop-shadow(0 0 6px rgba(0, 0, 0, 0.6))}
+    @keyframes flow{to{stroke-dashoffset:-200}}
+
+    /* ===== MAP ===== */
+    .map-hero{position:relative;min-height:86vh;display:grid;align-items:center;padding:64px 24px;overflow:hidden;
+      background:linear-gradient(180deg,rgba(175,175,175,.384),rgba(0, 217, 255, 0.274)),
+      url('https://www.elecnor.com/storage/media/files/shares/Imagenes_cabeceras/infra-electr-00-subestacion-ancoa-chile-celeo.jpg') center/cover no-repeat}
+    .map-overlay{position:absolute;right:200px;top:50%;transform:translateY(-50%);width:var(--panel-w-desktop);height:var(--panel-h-desktop);max-width:92vw;border-radius:16px;background:transparent}
+    #map{width:100%;height:100%;border:none}
+    #map,#map .leaflet-container{background:transparent!important}
+    #map .leaflet-tile-pane{opacity:0!important}
+    .leaflet-control-zoom a,.leaflet-control-zoom-in,.leaflet-control-zoom-out,
+    .leaflet-touch .leaflet-control-zoom-in,.leaflet-touch .leaflet-control-zoom-out{
+      background:var(--elec-navy)!important;color:#fff!important;border:1px solid var(--elec-navy-900)!important;border-radius:10px;box-shadow:var(--shadow)}
+    .leaflet-control-layers{background:var(--elec-navy);color:#fff;border:1px solid var(--elec-navy-900);border-radius:12px;box-shadow:var(--shadow);padding:6px 8px}
+    .leaflet-control-attribution{background:rgba(0,74,143,.95)!important;color:#fff!important;border-radius:8px;border:1px solid var(--elec-navy-900)!important}
+
+    .info-card{position:absolute;left:200px;top:50%;transform:translateY(-50%) translateX(-12px);z-index:9000;width:min(var(--card-w),92vw);
+      height:var(--card-h);max-width:640px;background:var(--elec-panes);border-radius:16px;box-shadow:var(--shadow);display:grid;
+      grid-template-rows:calc(var(--card-h) * var(--card-img-h)) 1fr;overflow:hidden}
+    .info-card__img img{width:100%;height:100%;object-fit:cover;display:block}
+    .info-card__body{padding:14px 16px 16px}
+    .info-card__title{margin:0;font-size:20px;line-height:1.25}
+    .info-card__meta{margin:0;color:#4a5a6d;font-size:15px;line-height:1.55}
+
+    .pin{position:relative;width:16px;height:16px;box-shadow:0 0 0 2px rgba(0,0,0,.15)}
+    .pin--office{background:var(--elec-navy);border:2.5px solid #fff;border-radius:50%}
+    .pin.is-active{background:var(--elec-orange)!important}
+
+    .cat-pin{position:relative;width:16px;height:16px;border-radius:50%;overflow:hidden;border:2px solid var(--elec-navy);
+      box-shadow:0 0 0 2px rgba(0,0,0,.15);background:var(--elec-navy)}
+    .cat-pin__img{width:100%;height:100%;object-fit:cover;display:block}
+    .leaflet-marker-icon.is-active .cat-pin{border-color:var(--elec-orange);box-shadow:0 0 0 2px rgba(255, 145, 0, 0.767),0 0 0 3px rgba(255, 166, 0, 0.726)}
+    .leaflet-marker-icon .cat-pin::after{content:"";position:absolute;inset:0;border-radius:50%;background:rgba(53,153,219,.00);transition:background .18s ease}
+    .leaflet-marker-icon.is-active .cat-pin::after{background:rgba(0, 0, 0, 0.24)}
+
+    .leader{position:absolute;inset:0;pointer-events:none;z-index:9999}
+    .leader .halo{stroke:#fff;stroke-opacity:.9;stroke-width:7;fill:none}
+    .leader .main{stroke:var(--elec-orange);stroke-width:4;fill:none}
+
+    .legend{position:absolute;left:0;bottom:0;z-index:401;display:flex;gap:16px;align-items:center;padding:8px 12px;background:var(--elec-navy);
+      color:#fff;border-radius:999px;box-shadow:var(--shadow);border:1px solid var(--elec-navy-900)}
+    .legend__item{display:flex;align-items:center;gap:8px;white-space:nowrap}
+    .legend__swatch{width:20px;height:20px;display:inline-block;box-sizing:border-box;border:2px solid #fff;background:var(--elec-navy-900);border-radius:50%}
+    .legend__icon{width:20px;height:20px;display:inline-block;object-fit:cover;border-radius:50%;border:2px solid var(--elec-navy);background:#004A8F}
+
+    @media (max-width:1023px){.map-overlay{right:24px;width:var(--panel-w-tablet);height:var(--panel-h-tablet)}}
+    @media (max-width:767px){.map-hero{padding-bottom:calc(var(--panel-h-tablet) + 56px)}.map-overlay{position:static;transform:none;margin:16px auto 0;
+      width:min(520px,92vw);height:var(--panel-h-tablet)}.leader{display:none}.legend{left:12px;right:12px;gap:12px;flex-wrap:wrap}}
+  </style>
+</head>
+<body>
+  <header class="site-header" role="banner">
+    <div class="main-bar">
+      <a class="logo" href="index.html" aria-label="Elecnor Home">
+        <img src="https://www.elecnor.com.au/storage/media/files/shares/logo-elecnoraustralia.png" alt="Elecnor" />
+      </a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav">
+        <span class="sr-only">Open menu</span>
+        <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+      </button>
+      <nav id="primary-nav" class="primary-nav" aria-label="Primary">
+        <ul class="top-level">
+          <li><a class="top-link" href="about.html">About</a></li>
+          <li class="has-sub">
+            <button class="top-link" type="button" aria-expanded="false" aria-controls="sub-projects">Projects</button>
+            <ul id="sub-projects" class="submenu" role="menu" aria-label="Projects">
+              <li role="none"><a role="menuitem" href="projects-wind.html">Wind</a></li>
+              <li role="none"><a role="menuitem" href="projects-solar.html">Solar</a></li>
+              <li role="none"><a role="menuitem" href="projects-bess.html">BESS</a></li>
+              <li role="none"><a role="menuitem" href="projects-transmission.html">Power Transmission</a></li>
+            </ul>
+          </li>
+          <li><a class="top-link" href="sustainability.html">Sustainability</a></li>
+          <li><a class="top-link" href="careers.html">Careers</a></li>
+          <li><a class="top-link" href="news.html">News</a></li>
+          <li><a class="top-link" href="contact.html">Contact Us</a></li>
+        </ul>
+        <div class="nav-actions">
+          <a class="search-link" href="search.html" aria-label="Search">
+            <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24"><path d="M10 18a8 8 0 1 1 6.32-3.11L22 20.5l-1.5 1.5-5.68-5.61A8 8 0 0 1 10 18Z" fill="currentColor"/></svg>
+          </a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero" aria-label="Hero">
+    <video class="hero__video" src="assets/hero.mp4" autoplay muted loop playsinline preload="metadata" poster="assets/poster.jpg" aria-label="Hero background video"></video>
+    <div class="hero__content">
+      <h1>We build essential infrastructure for tomorrow</h1>
+      <p>Design, Engineering and Construction of Critical Energy Infrastructure</p>
+    </div>
+    <section class="flashnews" role="region" aria-label="Latest news" id="flashnews">
+      <div class="flashnews__deck" id="flashnews-deck" aria-live="polite"></div>
+      <div class="dots" id="dots" role="tablist" aria-label="Slide indicators"></div>
+    </section>
+  </section>
+
+  <section class="hud-section" aria-label="Project video">
+    <!-- RESTORED animated SVG backdrop -->
+    <div class="grid-anim" aria-hidden="true">
+      <svg viewBox="0 0 1200 600" preserveAspectRatio="none">
+        <g class="tower">
+          <polygon points="150,520 180,300 220,300 250,520" />
+          <polygon points="550,520 580,280 620,280 650,520" />
+          <polygon points="950,520 980,320 1020,320 1050,520" />
+          <line x1="180" y1="330" x2="220" y2="330" />
+          <line x1="180" y1="370" x2="220" y2="370" />
+          <line x1="580" y1="310" x2="620" y2="310" />
+          <line x1="580" y1="350" x2="620" y2="350" />
+          <line x1="980" y1="350" x2="1020" y2="350" />
+          <line x1="980" y1="390" x2="1020" y2="390" />
+        </g>
+        <path class="wire" d="M0,340 C120,300 200,330 400,330 S680,300 820,320 S1000,360 1200,340" />
+        <path class="wire2" d="M0,380 C120,340 200,370 400,370 S680,340 820,360 S1000,400 1200,380" />
+        <circle class="node" cx="400" cy="330" r="3" />
+        <circle class="node" cx="820" cy="360" r="3" />
+        <circle class="node" cx="1000" cy="360" r="3" />
+      </svg>
+    </div>
+
+    <div class="hud-section__inner">
+      <h2 class="hud-title">Project Showcase</h2>
+
+      <div class="hud-layout">
+        <!-- Left: HUD TV -->
+        <div class="hud-tv" role="region" aria-label="Elecnor styled HUD video">
+          <div class="hud-frame"></div>
+          <div class="bezel"></div>
+          <div class="screen" role="region" aria-label="Video screen">
+            <video id="video" src="assets/myvideo.mp4" autoplay muted loop playsinline preload="metadata" poster="assets/poster.jpg"></video>
+            <div class="scanlines"></div>
+          </div>
+        </div>
+
+        <!-- Right: Description card (test only) -->
+        <aside class="desc-card" aria-label="Description (test)">
+          <h3>Project Energy Connect (PEC)</h3>
+          <h3></h3>
+          <p>
+            Elecnor Australia (formerly SecureEnergy) was awarded the engineering, construction and procurement (EPC) contract for the new 700km 330kv transmission line extending from Wagga Wagga NSW to the South Australian border of Transgrid’s EnergyConnect project in June 2021.</p>
+          <p>In its entirety, EnergyConnect includes a new 900km electricity transmission line, known as an interconnector, that will connect power grids across three Australian states, driving competition in the wholesale electricity market.</p>
+        </aside>
+      </div>
+
+      <!-- Featured flip cards under the HUB screen -->
+      <section class="featured" aria-label="Featured projects">
+        <h3 class="featured__title">Featured Projects</h3>
+        <div class="featured-cards">
+          <!-- Wind Project -->
+          <a class="flipcard" href="projects-wind.html" aria-label="View Wind projects">
+            <div class="flipcard__inner">
+              <div class="flipcard__face flipcard__front">
+                <img src="https://bloximages.chicago2.vip.townnews.com/stillwatercountynews.com/content/tncms/assets/v3/editorial/3/f5/3f5af27d-f788-4810-ab42-bca5c282eb1f/68a4f0b90f213.image.png" alt="Wind turbines at sunset">
+                <div class="flipcard__label">Wind — Featured</div>
+              </div>
+              <div class="flipcard__face flipcard__back">
+                <div>
+                  <h4>Flyers Creek Wind Farm</h4>
+                  <p>Elecnor is completing the full balance of plant for the civil and electrical works, as well as a 33/132kV substation and 15km of 132kV overhead transmission lines.</p>
+                </div>
+                <span class="flipcard__arrow" aria-hidden="true">➔</span>
+              </div>
+            </div>
+          </a>
+
+          <!-- Solar Project -->
+          <a class="flipcard" href="projects-solar.html" aria-label="View Solar projects">
+            <div class="flipcard__inner">
+              <div class="flipcard__face flipcard__front">
+                <img src="https://infrastructurepipeline.org/files/images/optimised/project_hero/files/images/project/shutterstock_169042739-68b4f234e4a1d955328060.jpg" alt="Solar farm panels">
+                <div class="flipcard__label">Solar — Featured</div>
+              </div>
+              <div class="flipcard__face flipcard__back">
+                <div>
+                  <h4>New England Solar Farm</h4>
+                  <p>The 522 MW DC project including a 33/330kV substation covered over 1,100 hectares. The project is the largest operating solar farm in Australia.</p>
+                </div>
+                <span class="flipcard__arrow" aria-hidden="true">➔</span>
+              </div>
+            </div>
+          </a>
+
+          <!-- BESS Project -->
+          <a class="flipcard" href="projects-bess.html" aria-label="View Battery Energy Storage projects">
+            <div class="flipcard__inner">
+              <div class="flipcard__face flipcard__front">
+                <img src="https://www.nsenergybusiness.com/wp-content/uploads/sites/4/2025/01/Rangebank-BESS-1.webp" alt="Battery Energy Storage units">
+                <div class="flipcard__label">BESS — Featured</div>
+              </div>
+              <div class="flipcard__face flipcard__back">
+                <div>
+                  <h4>Blyth BESS</h4>
+                  <p>Blyth BESS is a 200MW / 400 MWh battery energy storage project with a short transmission line into an Electranet substation.</p>
+                </div>
+                <span class="flipcard__arrow" aria-hidden="true">➔</span>
+              </div>
+            </div>
+          </a>
+
+          <!-- Transmission Project -->
+          <a class="flipcard" href="projects-transmission.html" aria-label="View Power Transmission projects">
+            <div class="flipcard__inner">
+              <div class="flipcard__face flipcard__front">
+                <img src="https://thewombatpost.com.au/wp-content/uploads/2021/08/500kv-power-lines-australia-1024x640.jpg" alt="Power transmission towers">
+                <div class="flipcard__label">Power Transmission — Featured</div>
+              </div>
+              <div class="flipcard__face flipcard__back">
+                <div>
+                  <h4>Project EnergyConnect</h4>
+                  <p>This backbone infrastructure will connect customers with more renewable energy enabling a further 4950MW of generation capacity.</p>
+                </div>
+                <span class="flipcard__arrow" aria-hidden="true">➔</span>
+              </div>
+            </div>
+          </a>
+        </div>
+      </section>
+
+    </div>
+  </section>
+
+  <section class="map-hero" aria-label="Map & Projects" id="map-hero">
+    <article class="info-card" id="infoCard" aria-live="polite">
+      <div class="info-card__img">
+        <img id="infoImg" alt="Welcome image" src="https://www.grupoelecnor.com/storage/media/thumbs/bd2e5eca8a0e956a502e3c7ae2d924771cd20cfa" onerror="this.src='https://shellenergy.com.au/wp-content/uploads/2023/09/BESS-Feature-image-752x580-1.jpg'"/>
+      </div>
+      <div class="info-card__body" id="infoBody">
+        <h3 class="info-card__title" id="infoTitle">Explore our projects &amp; offices</h3>
+        <p class="info-card__meta" id="infoMeta">Hover a pointer to preview, <strong>click to select</strong>. Your selection stays until another is chosen.</p>
+      </div>
+    </article>
+
+    <svg class="leader" id="leaderSvg" aria-hidden="true">
+      <path id="leaderHalo" class="halo" d=""/>
+      <path id="leaderMain" class="main" d=""/>
+    </svg>
+
+    <div class="map-overlay">
+      <div id="map" role="region" aria-label="Elecnor map (AU/NZ)"></div>
+      <div class="legend" id="legend" role="group" aria-label="Map key"></div>
+    </div>
+  </section>
+
+  <script src="lib/leaflet/dist/leaflet.js"></script>
+
+  <script>
+    const NEWS_DATA = [
+      { id:"n1", image:{ src:"https://www.compareenergy.com.au/content/images/pictures/4cd85cea75154949bed88073925a3799.jpg", alt:"Substation construction at dusk" }, headline:"Elecnor to build Australia's largest energy transmission project", summary:"Project Energy Connect is a major 700km electricity interconnector linking New South Wales, South Australia, and Victoria.", href:"#"},
+      { id:"n2", image:{ src:"assets/elecnortimco.png" }, headline:"Timco Transmission Lines is now fully merged into Elecnor Australia", summary:"Milestone in consolidating expertise in transmission and energy infrastructure across Victoria and nationwide.", href:"#"},
+      { id:"n3", image:{ src:"https://sympower.net/hubfs/BESS-Demand-Response-Whats-the-Connection-1920-1080px.jpg", alt:"Battery Energy Storage" }, headline:"Supporting Australia’s Energy Transition at Pelican Point BESS", summary:"Targeted to be operational by late 2027 Pelican Point BESS is a complex, high-impact energy solution.", href:"#"},
+      { id:"n4", image:{ src:"https://a.storyblok.com/f/268177/1200x900/06963a64e4/natalie-simpson-2.png", alt:"Wind turbines at sunset" }, headline:"Pine Lodge Terminal Station energised", summary:"This critical infrastructure connects the 250MW/500MWh Pine Lodge Battery Energy Storage System (BESS) to the Victorian grid, significantly boosting grid stability.", href:"#"},
+      { id:"n5", image:{ src:"https://media.licdn.com/dms/image/v2/D5622AQHWk02W6qX3yw/feedshare-shrink_800/B56ZsFcjYlK4As-/0/1765322930174?e=2147483647&v=beta&t=8QzySyQ8dO5kwMHvdYBxKumstq59-uYmUKQ1TsqeksQ", alt:"Elecnor office lobby" }, headline:"Elecnor is to build the largest solar farm in New Zealand", summary:"Tauhei Solar Park, with a capacity of 150 MW, will be the largest in the country and will produce clean energy for 35,000 homes", href:"#"},
+      { id:"n6", image:{ src:"https://media.licdn.com/dms/image/v2/D5622AQH98XAc9Rio-A/feedshare-shrink_800/B56ZXfmvShGsAg-/0/1743213235032?e=2147483647&v=beta&t=txP62TdRfuU9Oc5pOJfyyKefh-els_noGkGepNvXEXU", alt:"Elecnor solar farm project" }, headline:"Ivan Garcia Varas, Elecnor Australia's Director's word on Project Energy Connect", summary:"Honoured to share what Elecnor Australia is accomplishing in Australia, and proud to ensure that when it comes to Power Transmission & Renewable Energy, Elecnor is the name to trust", href:"#"}
+    ];
+  
+    (()=>{
+      const deck = document.getElementById('flashnews-deck');
+      const dotsWrap = document.getElementById('dots');
+      const AUTOPLAY_MS = Number(getComputedStyle(document.documentElement).getPropertyValue('--autoplay-interval')) || 4500;
+
+      let idx = 0; let autoplayTimeout = null; let isTouching = false; let touchStartX = 0; let startTs = 0; let remaining = AUTOPLAY_MS;
+
+      // Dots
+      NEWS_DATA.forEach((_, i) => {
+        const dot = document.createElement('button');
+        dot.className = 'dot'; dot.type = 'button'; dot.role = 'tab';
+        dot.setAttribute('aria-label', `Slide ${i+1} of ${NEWS_DATA.length}`);
+        dot.addEventListener('click', () => { goTo(i); restartAutoplay(); });
+        dotsWrap.appendChild(dot);
+      });
+
+      const cardEls = NEWS_DATA.map((item, i) => createCard(item, i));
+      cardEls.forEach(el => deck.appendChild(el));
+
+      function createCard(item, i){
+        const el = document.createElement('article');
+        el.className = 'flashnews__card';
+        el.setAttribute('role','group');
+        el.setAttribute('aria-roledescription','slide');
+        el.setAttribute('aria-label',`${i+1} of ${NEWS_DATA.length}`);
+        el.innerHTML = `
+          <div class="flashnews__imgwrap"><img src="${item.image.src}" alt="${item.image.alt||''}" loading="lazy"></div>
+          <div class="flashnews__body">
+            <h3 class="flashnews__title">${item.headline}</h3>
+            <p class="flashnews__summary">${item.summary||''}</p>
+          </div>
+          <div class="flashnews__footer">
+            <div class="progress" aria-hidden="true"><div class="progress__fill"></div></div>
+            <div class="footer-nav">
+              <button class="footer-btn footer-btn--prev" type="button" aria-label="Previous">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 18l-6-6 6-6" stroke="#111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <button class="footer-btn footer-btn--next" type="button" aria-label="Next">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="#111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+            </div>
+          </div>`;
+        el.querySelector('.footer-btn--next').addEventListener('click', () => { next(); restartAutoplay(); });
+        el.querySelector('.footer-btn--prev').addEventListener('click', () => { prev(); restartAutoplay(); });
+
+        el.addEventListener('mouseenter', pauseAutoplay);
+        el.addEventListener('mouseleave', resumeAutoplay);
+        el.addEventListener('focusin',  pauseAutoplay);
+        el.addEventListener('focusout', resumeAutoplay);
+
+        el.addEventListener('touchstart', (e) => { isTouching = true; touchStartX = e.changedTouches[0].clientX; pauseAutoplay(); }, {passive:true});
+        el.addEventListener('touchend',   (e) => { const dx = e.changedTouches[0].clientX - touchStartX; if(Math.abs(dx)>40){ dx<0?next():prev(); restartAutoplay(); } else { resumeAutoplay(); } isTouching=false; });
+
+        return el;
+      }
+
+      function render(){
+        cardEls.forEach((el) => { el.classList.remove('is-active'); el.style.opacity = 0; });
+        const active = cardEls[idx]; active.classList.add('is-active'); active.style.opacity = 1;
+        [...dotsWrap.children].forEach((d, i) => d.classList.toggle('is-active', i===idx));
+        const fill = active.querySelector('.progress__fill');
+        if (fill) {
+          fill.style.transition = 'none';
+          fill.style.inlineSize = '0%';
+          void fill.offsetWidth;
+          fill.style.transition = `inline-size ${remaining}ms linear`;
+          fill.style.inlineSize = '100%';
+        }
+        startTs = performance.now(); scheduleAutoplay(remaining);
+      }
+
+      function scheduleAutoplay(delay){ clearTimeout(autoplayTimeout); autoplayTimeout = setTimeout(() => { next(true); }, delay); }
+      function next(){ idx = (idx + 1) % NEWS_DATA.length; remaining = AUTOPLAY_MS; render(); }
+      function prev(){ idx = (idx - 1 + NEWS_DATA.length) % NEWS_DATA.length; remaining = AUTOPLAY_MS; render(); }
+      function goTo(i){ idx = i % NEWS_DATA.length; remaining = AUTOPLAY_MS; render(); }
+
+      function pauseAutoplay(){
+        if (autoplayTimeout){
+          clearTimeout(autoplayTimeout); autoplayTimeout = null;
+          const elapsed = Math.max(0, performance.now() - startTs);
+          remaining = Math.max(0, AUTOPLAY_MS - elapsed);
+          const active = cardEls[idx]; const fill = active.querySelector('.progress__fill');
+          if (fill){ const pct = Math.min(100, (elapsed / AUTOPLAY_MS) * 100); fill.style.transition = 'none'; fill.style.inlineSize = pct + '%'; }
+        }
+      }
+      function resumeAutoplay(){
+        if (!autoplayTimeout && !isTouching){
+          const active = cardEls[idx]; const fill = active.querySelector('.progress__fill');
+          if (fill){ void fill.offsetWidth; fill.style.transition = `inline-size ${remaining}ms linear`; fill.style.inlineSize = '100%'; }
+          startTs = performance.now(); scheduleAutoplay(remaining || AUTOPLAY_MS);
+        }
+      }
+      function restartAutoplay(){ remaining = AUTOPLAY_MS; render(); }
+      document.addEventListener('keydown', (e) => { if (e.key === 'ArrowRight'){ next(); restartAutoplay(); } if (e.key === 'ArrowLeft'){ prev(); restartAutoplay(); } });
+
+      render();
+    })();
+  </script>
+
+  <script>
+    const IMG_FALLBACK = 'https://www.venturesteelgroup.com/wp-content/uploads/2025/02/Solar-Farm-Sunset-scaled.jpg';
+    const TYPE_IMG = {
+      'Solar': 'https://images.unsplash.com/photo-1509395176047-4a66953fd231?q=80&w=1600&auto=format&fit=crop',
+      'Wind' : 'https://insights.taylorandfrancis.com/wp-content/uploads/2024/05/shorthand/367/yFlhITMfIE/assets/qqpeEUbA3K/e1w1ay-4096x2726.jpg',
+      'BESS' : 'https://images.squarespace-cdn.com/content/v1/60fb715bdce0f7019759cfc7/74aac7c2-9d22-4684-ba3f-0a3005a2323f/iStock-2172501593.jpg',
+      'Power Transmission': 'https://images.unsplash.com/photo-1509395062183-67c5ad6faff9?q=80&w=1600&auto=format&fit=crop',
+      'Office': 'https://www.datocms-assets.com/136317/1748399015-20250424_mpa_83clarencelobby_22_012a6712.jpg'
+    };
+
+    const CATEGORY_ICONS = {
+      'Solar': { marker: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSqURQq4TAcn0cK9sVMlQNCCW9YazH1uBRa9g&s', legend: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSqURQq4TAcn0cK9sVMlQNCCW9YazH1uBRa9g&s' },
+      'Wind':  { marker: 'https://static.vecteezy.com/system/resources/thumbnails/073/190/278/small/illustration-of-a-traditional-dutch-windmill-in-a-classic-blue-and-white-design-vector.jpg', legend: 'https://static.vecteezy.com/system/resources/thumbnails/073/190/278/small/illustration-of-a-traditional-dutch-windmill-in-a-classic-blue-and-white-design-vector.jpg' },
+      'BESS':  { marker: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTymjtn6OzdcTgpaQSF4o9XlIXgHJ-ryg-zsA&s', legend: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTymjtn6OzdcTgpaQSF4o9XlIXgHJ-ryg-zsA&s' },
+      'Power Transmission': { marker: 'https://thumbs.dreamstime.com/b/clean-modern-vector-illustration-electricity-pylon-also-known-as-power-transmission-tower-rendered-solid-dark-blue-436895581.jpg', legend: 'https://thumbs.dreamstime.com/b/clean-modern-vector-illustration-electricity-pylon-also-known-as-power-transmission-tower-rendered-solid-dark-blue-436895581.jpg' }
+    };
+
+    function normalizeType(t){
+      if (!t) return null;
+      const s = String(t).trim().toLowerCase();
+      if (s === 'solar') return 'Solar';
+      if (s === 'wind') return 'Wind';
+      if (s === 'bess') return 'BESS';
+      if (['power transmission','transmission','powertransmission','power-tx','tx'].includes(s)) return 'Power Transmission';
+      return t;
+    }
+
+    const infoCard = document.getElementById('infoCard');
+    const infoImg = document.getElementById('infoImg');
+    const infoTitle = document.getElementById('infoTitle');
+    const infoMeta  = document.getElementById('infoMeta');
+    const leaderHalo = document.getElementById('leaderHalo');
+    const leaderMain = document.getElementById('leaderMain');
+    const mapHero = document.getElementById('map-hero');
+
+    const anzBounds = L.latLngBounds(L.latLng(-49.5,108.0), L.latLng(-8.0,180.0));
+    const map = L.map('map', { scrollWheelZoom:true, maxBounds:anzBounds, maxBoundsViscosity:1.0, worldCopyJump:false });
+    map.fitBounds(anzBounds); const minZ = map.getBoundsZoom(anzBounds, true); map.setMinZoom(minZ);
+
+    const bordersPane = 'borders';
+    if (!map.getPane(bordersPane)) { const p = map.createPane(bordersPane); p.style.zIndex = 350; p.style.pointerEvents='none'; }
+    const linePane = 'transmission-lines';
+    if (!map.getPane(linePane)) { const p = map.createPane(linePane); p.style.zIndex = 360; p.style.pointerEvents = 'auto'; }
+
+    fetch('data/anz_borders.geojson')
+      .then(r=>r.json())
+      .then(geo=>{ L.geoJSON(geo,{ style:{color: getComputedStyle(document.documentElement).getPropertyValue('--elec-navy'),weight:3,opacity:0.95,fill:true,fillColor:getComputedStyle(document.documentElement).getPropertyValue('--elec-lightblue'),fillOpacity:0.85}, pane:bordersPane }).addTo(map); })
+      .catch(err=>console.error('Failed to load anz_borders.geojson', err));
+
+    const officeIcon = L.divIcon({ className:'pin pin--office', html:'', iconSize:[16,16], iconAnchor:[8,8], popupAnchor:[0,-8] });
+
+    function createCircularCategoryIcon(url){
+      const html = url
+        ? '<div class="cat-pin"><img class="cat-pin__img" src="'+url+'" alt="" onerror="this.style.display=\'none\'"/></div>'
+        : '<div class="cat-pin"></div>';
+      return L.divIcon({ className: '', html, iconSize:[16,16], iconAnchor:[8,8], popupAnchor:[0,-8] });
+    }
+    function getProjectIconByCategory(cat){
+      const cfg = CATEGORY_ICONS[cat] || {};
+      return createCircularCategoryIcon(cfg.marker || '');
+    }
+
+    const PROJECT_ICONS = {
+      'Solar': getProjectIconByCategory('Solar'),
+      'Wind': getProjectIconByCategory('Wind'),
+      'BESS': getProjectIconByCategory('BESS'),
+      'Power Transmission': getProjectIconByCategory('Power Transmission')
+    };
+
+    const officeGroup = L.layerGroup().addTo(map);
+    const projectGroup = L.layerGroup().addTo(map);
+    const transmissionLinesGroup = L.layerGroup().addTo(map);
+
+    const layersControl = L.control.layers(null, null, { collapsed:false }).addTo(map);
+
+    let currentMarker = null;
+    let currentLeaderLatLng = null;
+
+    function drawLeader(latlng){
+      if (!latlng){ leaderHalo.setAttribute('d',''); leaderMain.setAttribute('d',''); return; }
+      const heroRect = mapHero.getBoundingClientRect();
+      const cardRect = infoCard.getBoundingClientRect();
+      const x1 = (cardRect.right - heroRect.left);
+      const y1 = (cardRect.top - heroRect.top) + cardRect.height/2;
+      const p = map.latLngToContainerPoint(latlng);
+      const mapRect = document.getElementById('map').getBoundingClientRect();
+      const x2 = (mapRect.left - heroRect.left) + p.x;
+      const y2 = (mapRect.top - heroRect.top) + p.y;
+      const dx = Math.max(60, (x2 - x1) * 0.5); const cx = x1 + dx; const cy = y1;
+      const d = `M ${x1},${y1} Q ${cx},${cy} ${x2},${y2}`;
+      leaderHalo.setAttribute('d', d); leaderMain.setAttribute('d', d);
+      currentLeaderLatLng = latlng;
+    }
+
+    function buildCardData(kind, payload){
+      if (kind === 'office'){
+        const img = payload.img || TYPE_IMG['Office'] || IMG_FALLBACK;
+        return { title: payload.name, meta:`Office — ${payload.city || ''}`.trim(), img };
+      }
+      const t = normalizeType(payload.type);
+      const img = payload.img || TYPE_IMG[t] || IMG_FALLBACK;
+      const parts = [t, payload.size].filter(Boolean).join(' • ');
+      const meta = [parts, payload.state].filter(Boolean).join(' — ');
+      return { title: payload.name, meta, img };
+    }
+
+    function setActivePin(marker, active){
+      const el = marker?.getElement ? marker.getElement() : marker?._icon;
+      if (el){ el.classList.toggle('is-active', !!active); }
+    }
+    function setCard(data){
+      infoTitle.textContent = data.title;
+      infoMeta.textContent = data.meta;
+      if (infoImg && infoImg.src !== data.img) infoImg.src = data.img;
+    }
+    function activate(marker){
+      if (currentMarker && currentMarker !== marker) setActivePin(currentMarker,false);
+      currentMarker = marker; setActivePin(marker,true);
+      const data = buildCardData(marker.__kind, marker.__payload); setCard(data);
+      const ll = marker.getLatLng(); drawLeader(ll); requestAnimationFrame(()=>drawLeader(ll)); setTimeout(()=>drawLeader(ll),80);
+    }
+
+    function attachMarkerBehavior(marker, kind, payload){
+      marker.__kind = kind; marker.__payload = payload;
+      marker.on('click', (e)=>{ activate(marker); e.originalEvent?.stopPropagation?.(); });
+      if (!('ontouchstart' in window || navigator.maxTouchPoints>0)){
+        marker.on('mouseover', ()=>{ activate(marker); });
+      }
+    }
+
+    Promise.all([
+      fetch('data/officers.json').then(r=>r.json()),
+      fetch('data/projects.json').then(r=>r.json())
+    ]).then(([offices, projects])=>{
+      offices.forEach(o=>{
+        const m=L.marker([o.lat,o.lng],{icon:officeIcon}).addTo(officeGroup);
+        attachMarkerBehavior(m,'office',o);
+      });
+
+      projects.forEach(p=>{
+        const cat = normalizeType(p.type) || 'Solar';
+        const icon = PROJECT_ICONS[cat] || getProjectIconByCategory(cat);
+        const m=L.marker([p.lat,p.lng],{icon}).addTo(projectGroup);
+        attachMarkerBehavior(m,'project',Object.assign({}, p, { type: cat }));
+      });
+
+      layersControl.addOverlay(officeGroup, 'Offices');
+      layersControl.addOverlay(projectGroup, 'Projects');
+
+      buildLegend();
+    }).catch(console.error);
+
+    map.on('move zoom', ()=>{ if (currentLeaderLatLng) drawLeader(currentLeaderLatLng); });
+
+    function lineDefaultStyle() { return { color: getComputedStyle(document.documentElement).getPropertyValue('--line'), weight: 5, opacity: 0.95, pane: linePane }; }
+    function lineHoverStyle()   { return { color: getComputedStyle(document.documentElement).getPropertyValue('--elec-orange'), weight: 6, opacity: 1.0            , pane: linePane }; }
+    function lineHaloStyle()    { return { color: '#FFFFFF', weight: 6, opacity: 0.9,  pane: linePane }; }
+
+    const canvasRenderer = L.canvas({ padding: 0.5 });
+
+    fetch('data/transmission_line.geojson')
+      .then(r => r.json())
+      .then(geo => {
+        const halo = L.geoJSON(geo, { style: lineHaloStyle, renderer: canvasRenderer, pane: linePane });
+        const main = L.geoJSON(geo, {
+          style: lineDefaultStyle,
+          renderer: canvasRenderer,
+          onEachFeature: (feature, layer) => {
+            const getMid = () => { try { return layer.getBounds().getCenter(); } catch (e) { return null; } };
+            const payload = { name: feature.properties?.name || 'Transmission Segment', type: 'Power Transmission', size: null, state: null, img: feature.properties?.img || TYPE_IMG['Power Transmission'] || IMG_FALLBACK };
+            layer.on('mouseover', () => { layer.setStyle(lineHoverStyle()); const mid = getMid(); if (mid) drawLeader(mid); const data = buildCardData('project', payload); setCard(data); });
+            layer.on('mouseout',  () => { layer.setStyle(lineDefaultStyle()); });
+            layer.on('click', () => { if (currentMarker) { setActivePin(currentMarker, false); currentMarker = null; } const data = buildCardData('project', payload); setCard(data); const mid = getMid(); if (mid) drawLeader(mid); });
+          },
+          pane: linePane
+        });
+        halo.addTo(transmissionLinesGroup);
+        main.addTo(transmissionLinesGroup);
+        layersControl.addOverlay(transmissionLinesGroup, 'Transmission Lines');
+      })
+      .catch(err => console.error('Failed to load transmission_line.geojson:', err));
+
+    function legendItemOffice(){ const wrap = document.createElement('span'); wrap.className = 'legend__item'; const sw = document.createElement('span'); sw.className = 'legend__swatch'; const label = document.createElement('span'); label.textContent = 'Office'; wrap.appendChild(sw); wrap.appendChild(label); return wrap; }
+    function legendItemCategory(cat, label){ const wrap = document.createElement('span'); wrap.className = 'legend__item'; const img = document.createElement('img'); img.className='legend__icon'; const cfg = CATEGORY_ICONS[cat] || {}; if (cfg.legend) img.src = cfg.legend; img.alt = `${label} icon`; wrap.appendChild(img); const text = document.createElement('span'); text.textContent = label; wrap.appendChild(text); return wrap; }
+    function legendItemLine(label = 'Transmission Lines') { const wrap = document.createElement('span'); wrap.className = 'legend__item'; const sw = document.createElement('span'); sw.style.width = '24px'; sw.style.height = '4px'; sw.style.borderRadius = '2px'; sw.style.background = 'var(--elec-navy)'; sw.style.display = 'inline-block'; sw.style.boxShadow = '0 0 0 2px rgba(255,255,255,.85)'; const text = document.createElement('span'); text.textContent = label; wrap.appendChild(sw); wrap.appendChild(text); return wrap; }
+    function buildLegend(){ const legend = document.getElementById('legend'); legend.innerHTML = ''; legend.appendChild(legendItemOffice()); legend.appendChild(legendItemCategory('Solar','Solar')); legend.appendChild(legendItemCategory('Wind','Wind')); legend.appendChild(legendItemCategory('BESS','BESS')); legend.appendChild(legendItemCategory('Power Transmission','Power Transmission')); legend.appendChild(legendItemLine()); }
+  </script>
+
+  <script src="assets/js/nav.js"></script>
+</body>
+</html>

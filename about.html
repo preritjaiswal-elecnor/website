@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>About — Elecnor Australia</title>
+  <link rel="stylesheet" href="lib/leaflet/dist/leaflet.css" />
+  <!-- You can keep this if you add a nav.css later; safe to leave as-is -->
+  <link rel="stylesheet" href="assets/css/nav.css" />
+  <style>
+    :root{ --surface:#ffffffd0; --elec-panes:#A2BEEE; --text:#111; --text-muted:#555; --ink:#255dc5; --ink2:#001950; --elec-orange:#ff8800; --elec-lightblue:#A2BEEE; --shadow:0 10px 25px rgba(70,49,49,.18); }
+    body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,"Noto Sans","Helvetica Neue",sans-serif;background:var(--surface);color:var(--text)}
+
+    /* Hero */
+    .about-hero{position:relative;min-height:46vh;display:grid;align-items:end;padding:64px 20px 24px;background:
+      linear-gradient(180deg,rgba(0,0,0,.00),rgba(0,0,0,.25)),
+      url('https://images.unsplash.com/photo-1469474968028-56623f02e42e?q=80&w=1920&auto=format&fit=crop') center/cover no-repeat}
+    .about-hero__inner{max-width:1100px;margin:0 auto;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.35)}
+    .eyebrow{display:inline-block;padding:.35rem .6rem;border-radius:.5rem;background:rgba(255,255,255,.18);backdrop-filter:blur(2px);font-weight:600}
+    .page-title{font-size:clamp(32px,5vw,56px);margin:10px 0 6px}
+    .lead{font-size:1.1rem;max-width:70ch;margin:0}
+
+    /* Breadcrumbs */
+    .breadcrumbs{max-width:1100px;margin:18px auto 0;padding:0 20px;color:#333}
+    .breadcrumbs a{color:#333;text-decoration:none}
+
+    /* Content wrap */
+    .page-wrap{max-width:1100px;margin:24px auto 64px;padding:0 20px}
+
+    /* Value cards */
+    .values{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:24px 0}
+    .value{background:var(--elec-panes);border-radius:16px;box-shadow:var(--shadow);padding:16px;display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:start}
+    .value__icon{width:42px;height:42px;border-radius:10px;display:grid;place-items:center;background:#fff7e8;border:1px solid #ffd89e}
+    .value__title{margin:0;font-size:18px}
+    .value__desc{margin:6px 0 0;color:var(--text-muted);font-size:15px;line-height:1.55}
+
+    /* Metrics */
+    .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:8px 0 24px}
+    .metric{background:var(--elec-panes);border-radius:16px;box-shadow:var(--shadow);padding:16px;text-align:center}
+    .metric__num{font-size:clamp(22px,3.5vw,34px);font-weight:800;color:#222}
+    .metric__label{color:var(--text-muted);font-size:14px}
+
+    /* --- New: subtle hover pop for metric numbers --- */
+    .metric__num {
+      transition: color .2s ease, transform .2s ease;
+      will-change: transform;
+    }
+    .metrics .metric:hover .metric__num {
+      transform: translateY(-1px);
+    }
+
+    /* Story grid */
+    .grid{display:grid;grid-template-columns:1.1fr .9fr;gap:24px;margin:18px 0}
+    .card{background:var(--elec-panes);border-radius:16px;box-shadow:var(--shadow);padding:18px;overflow:hidden}
+    .card img{width:100%;height:260px;object-fit:cover;border-radius:12px}
+
+    /* --- New: Card hover zoom --- */
+    .card img {
+      transition: transform .35s ease, filter .35s ease;
+      will-change: transform;
+    }
+    .card:hover img {
+      transform: scale(1.03); /* Subtle zoom */
+      /* Optional tiny pop:
+      filter: saturate(1.02) contrast(1.02);
+      */
+    }
+
+    /* Timeline */
+    .timeline{position:relative;margin:24px 0}
+    .timeline::before{content:"";position:absolute;left:14px;top:0;bottom:0;width:2px;background:#ffcf8d}
+    .tl-item{position:relative;padding-left:44px;margin:14px 0}
+    .tl-dot{position:absolute;left:8px;top:6px;width:12px;height:12px;border-radius:50%;background:var(--elec-orange);box-shadow:0 0 0 3px #fff}
+    .tl-title{margin:0 0 4px;font-weight:700}
+    .tl-text{margin:0;color:var(--text-muted)}
+
+    /* CTA band */
+    .cta{margin:36px 0 0;border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}
+    .cta__bar{background:linear-gradient(180deg,var(--ink),var(--ink2));padding:18px;color:#052a2b;display:grid;grid-template-columns:1fr auto;align-items:center}
+    .cta__bar h3{margin:0;color:#fff}
+    .cta__actions{display:flex;gap:8px}
+    .btn{display:inline-flex;align-items:center;gap:8px;padding:.6rem .9rem;border-radius:.6rem;border:2px solid #fff3;cursor:pointer;text-decoration:none}
+    .btn--light{background:#fff;color:#052a2b;border-color:#fff}
+    .btn--ghost{background:transparent;color:#fff;border-color:#fff}
+
+    @media (max-width:1000px){
+      .values{grid-template-columns:1fr 1fr}
+      .metrics{grid-template-columns:1fr 1fr}
+      .grid{grid-template-columns:1fr}
+    }
+    @media (max-width:560px){
+      .values{grid-template-columns:1fr}
+      .metrics{grid-template-columns:1fr 1fr}
+    }
+
+    /* --- Respect reduced motion preferences for accessibility --- */
+    @media (prefers-reduced-motion: reduce) {
+      .card img {
+        transition: none !important;
+      }
+      .card:hover img {
+        transform: none !important;
+      }
+      .metric__num {
+        transition: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header" role="banner">
+    <div class="main-bar">
+      <a class="logo" href="index.html" aria-label="Elecnor Home">
+        <img src="https://www.elecnor.com.au/storage/media/files/shares/logo-elecnoraustralia.png" alt="Elecnor" />
+      </a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav">
+        <span class="sr-only">Open menu</span>
+        <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+      </button>
+      <nav id="primary-nav" class="primary-nav" aria-label="Primary">
+        <ul class="top-level">
+          <li><a class="top-link" href="about.html" aria-current="page">About</a></li>
+          <li class="has-sub">
+            <button class="top-link" type="button" aria-expanded="false" aria-controls="sub-projects">Projects</button>
+            <ul id="sub-projects" class="submenu" role="menu" aria-label="Projects">
+              <li role="none"><a role="menuitem" href="projects-wind.html">Wind</a></li>
+              <li role="none"><a role="menuitem" href="projects-solar.html">Solar</a></li>
+              <li role="none"><a role="menuitem" href="projects-bess.html">BESS</a></li>
+              <li role="none"><a role="menuitem" href="projects-transmission.html">Power Transmission</a></li>
+            </ul>
+          </li>
+          <li><a class="top-link" href="sustainability.html">Sustainability</a></li>
+          <li><a class="top-link" href="careers.html">Careers</a></li>
+          <li><a class="top-link" href="news.html">News</a></li>
+          <li><a class="top-link" href="contact.html">Contact Us</a></li>
+        </ul>
+        <div class="nav-actions">
+          <a class="search-link" href="search.html" aria-label="Search">
+            <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24"><path d="M10 18a8 8 0 1 1 6.32-3.11L22 20.5l-1.5 1.5-5.68-5.61A8 8 0 0 1 10 18Z" fill="currentColor"/></svg>
+          </a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="about-hero" role="banner">
+    <div class="about-hero__inner">
+      <span class="eyebrow">About us</span>
+      <h1 class="page-title">Engineering Australia’s energy transition</h1>
+      <p class="lead">Design, engineering and construction of transmission, substations, BESS, wind and solar—delivered safely and at scale across Australia &amp; New Zealand.</p>
+    </div>
+  </section>
+
+  <nav class="breadcrumbs" aria-label="Breadcrumb">
+    <a href="index.html">Home</a> › <span>About</span>
+  </nav>
+
+  <main class="page-wrap" role="main">
+    <!-- Values / Differentiators -->
+    <section class="values" aria-label="Our values">
+      <article class="value">
+        <div class="value__icon">⚡</div>
+        <div>
+          <h3 class="value__title">Grid-scale expertise</h3>
+          <p class="value__desc">End-to-end capability across high‑voltage transmission and substations, integrating renewables and storage with minimal outage windows.</p>
+        </div>
+      </article>
+      <article class="value">
+        <div class="value__icon">🧭</div>
+        <div>
+          <h3 class="value__title">Safety &amp; certainty</h3>
+          <p class="value__desc">Proven HSE systems, program certainty and commercial transparency—so complex projects stay predictable from design to energisation.</p>
+        </div>
+      </article>
+      <article class="value">
+        <div class="value__icon">🤝</div>
+        <div>
+          <h3 class="value__title">Delivery partnerships</h3>
+          <p class="value__desc">Collaborative delivery with utilities, developers and OEMs, with local supply chains and regional workforces.</p>
+        </div>
+      </article>
+    </section>
+
+    <!-- Metrics / Fast facts (updated to use data-target / data-suffix) -->
+    <section class="metrics" aria-label="Fast facts">
+      <div class="metric">
+        <div class="metric__num" data-target="700" data-suffix="+ km">0</div>
+        <div class="metric__label">Transmission corridors delivered*</div>
+      </div>
+      <div class="metric">
+        <div class="metric__num" data-target="250" data-suffix="+ MW">0</div>
+        <div class="metric__label">BESS under delivery*</div>
+      </div>
+      <div class="metric">
+        <div class="metric__num" data-target="20" data-suffix="+ yrs">0</div>
+        <div class="metric__label">In Australia &amp; NZ</div>
+      </div>
+      <div class="metric">
+        <div class="metric__num" data-target="100" data-suffix="%">0</div>
+        <div class="metric__label">Our safety ambition</div>
+      </div>
+    </section>
+
+    <!-- Story with imagery -->
+    <section class="grid" aria-label="Our story">
+      <article class="card">
+        <img src="https://www.agwayenergy.com/wp-content/uploads/2022/11/Whats-the-Difference-Between-Distribution-Transmission-Power-Lines.png" alt="Transmission line construction"/>
+        <h3>Building essential infrastructure</h3>
+        <p>From remote outback alignments to metropolitan brownfields, our teams deliver constructability‑led designs and safe execution. We integrate digital QA, reality capture and commissioning records so network operators have full asset provenance.</p>
+      </article>
+      <article class="card">
+        <img src="https://www.repsol.com/content/dam/repsol-corporate/es/energia-e-innovacion/central-solar-repsol.jpg" alt="Solar plant construction"/>
+        <h3>Renewables at utility scale</h3>
+        <p>We partner with developers and IPPs to connect wind, solar and battery plants to the grid, managing quality, schedule interfaces and energisation risks across complex multi‑contract environments.</p>
+      </article>
+    </section>
+
+    <!-- Timeline -->
+    <section class="timeline" aria-label="Milestones">
+      <div class="tl-item"><span class="tl-dot"></span><h4 class="tl-title">2008–2015 • Foundations</h4><p class="tl-text">Early transmission and renewable interconnections across Australia and New Zealand.</p></div>
+      <div class="tl-item"><span class="tl-dot"></span><h4 class="tl-title">2016–2022 • Expansion</h4><p class="tl-text">Scaled EPC capabilities in substations, long‑span lines and early grid‑forming storage pilots.</p></div>
+      <div class="tl-item"><span class="tl-dot"></span><h4 class="tl-title">2023–Today • Energy transition</h4><p class="tl-text">BESS, wind and solar portfolios; strengthening transmission to unlock renewable zones and firming.</p></div>
+    </section>
+
+    <!-- CTA band -->
+    <section class="cta" aria-label="Call to action">
+      <div class="cta__bar">
+        <h3>Ready to connect your next project?</h3>
+        <div class="cta__actions">
+          <a class="btn btn--light" href="contact.html">Contact us</a>
+          <a class="btn btn--ghost" href="projects-transmission.html">See transmission work</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- If you don't have nav.js, this script tag won't hurt. -->
+  <script src="assets/js/nav.js"></script>
+
+  <!-- Inline JS: metrics count-up + reduced motion safe + IntersectionObserver -->
+  <script>
+    (function () {
+      const metricsSection = document.querySelector('.metrics');
+      if (!metricsSection) return;
+
+      const nums = metricsSection.querySelectorAll('.metric__num');
+      if (!nums.length) return;
+
+      let hasAnimated = false;
+
+      function animateValue(el, target, suffix = '', duration = 1400) {
+        const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (prefersReduced || duration <= 0) {
+          try {
+            el.textContent = new Intl.NumberFormat().format(Number(target)) + (suffix || '');
+          } catch {
+            el.textContent = String(target) + (suffix || '');
+          }
+          return;
+        }
+
+        const start = 0;
+        const startTime = performance.now();
+        const nf = new Intl.NumberFormat();
+
+        function tick(now) {
+          const progress = Math.min((now - startTime) / duration, 1);
+          const eased = 1 - Math.pow(1 - progress, 3); // easeOutCubic
+          const current = Math.round(start + (target - start) * eased);
+          el.textContent = nf.format(current) + (suffix || '');
+          if (progress < 1) requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+      }
+
+      function startCountUp() {
+        if (hasAnimated) return;
+        hasAnimated = true;
+
+        nums.forEach(el => {
+          // Preferred: read from data attributes
+          const tAttr = el.getAttribute('data-target');
+          if (tAttr !== null) {
+            const target = Number(tAttr);
+            const suffix = el.getAttribute('data-suffix') || '';
+            animateValue(el, isNaN(target) ? 0 : target, suffix);
+            return;
+          }
+
+          // Fallback: parse leading number from existing text (if someone removes data-* later)
+          const text = el.textContent.trim();
+          const match = text.match(/^\s*([\d,]+)/);
+          const num = match ? Number(match[1].replace(/,/g, '')) : 0;
+          const suffix = text.slice(match ? match[0].length : 0);
+          animateValue(el, isNaN(num) ? 0 : num, suffix);
+        });
+      }
+
+      if ('IntersectionObserver' in window) {
+        const io = new IntersectionObserver((entries, obs) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              startCountUp();
+              obs.disconnect();
+            }
+          });
+        }, { root: null, threshold: 0.35 });
+
+        io.observe(metricsSection);
+      } else {
+        // Fallback for very old browsers
+        const onScroll = () => {
+          const rect = metricsSection.getBoundingClientRect();
+          const vh = window.innerHeight || document.documentElement.clientHeight;
+          if (rect.top < vh * 0.65 && rect.bottom > 0) {
+            startCountUp();
+            window.removeEventListener('scroll', onScroll);
+          }
+        };
+        window.addEventListener('scroll', onScroll, { passive: true });
+        onScroll();
+      }
+    })();
+  </script>
+</body>
+</html>

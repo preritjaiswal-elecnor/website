@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BESS — Elecnor Australia</title>
+  <link rel="stylesheet" href="assets/css/nav.css" />
+  <style>
+    :root{ --surface:#ffffffd0; --elec-panes:#A2BEEE; --text:#111; --text-muted:#555; --ink:#255dc5; --ink2:#001950; --elec-orange:#ff8800; --elec-lightblue:#A2BEEE; --shadow:0 10px 25px rgba(70,49,49,.18); }
+    body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,"Noto Sans","Helvetica Neue",sans-serif;background:var(--surface);color:var(--text)}
+
+    /* HERO */
+    .bess-hero{position:relative;min-height:46vh;display:grid;align-items:end;padding:64px 20px 24px;background:
+      linear-gradient(180deg,rgba(0,0,0,.00),rgba(0,0,0,.35)),
+      /* Replace with a BESS image later */
+      url('https://www.benderinc.com/fileadmin/blog/US/2022-04-25--common-bess-and-pv-system-setups/common-bess-and-pv-system-setups_2.jpg') center/cover no-repeat}
+    .bess-hero__inner{max-width:1100px;margin:0 auto;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.35)}
+    .eyebrow{display:inline-block;padding:.35rem .6rem;border-radius:.5rem;background:rgba(255,255,255,.18);backdrop-filter:blur(2px);font-weight:600}
+    .page-title{font-size:clamp(32px,5vw,56px);margin:10px 0 6px}
+    .lead{font-size:1.05rem;max-width:70ch;margin:0}
+
+    /* Breadcrumbs */
+    .breadcrumbs{max-width:1100px;margin:18px auto 0;padding:0 20px;color:#333}
+    .breadcrumbs a{color:#333;text-decoration:none}
+
+    /* Toolbar */
+    .toolbar-wrap{max-width:1100px;margin:18px auto 0;padding:0 20px}
+    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    .stat{background:#fff;border:1px solid #e8ebef;border-radius:12px;box-shadow:var(--shadow);padding:12px 14px}
+    .stat__k{font-size:13px;color:#334}
+    .stat__v{font-weight:800;color:#0b1a34}
+
+    .filters{display:grid;grid-template-columns:1fr auto;gap:12px;margin-top:10px}
+    .search{display:flex;align-items:center;background:#fff;border:1px solid #e8ebef;border-radius:999px;padding:8px 12px;box-shadow:0 4px 18px rgba(0,0,0,.05)}
+    .search input{border:0;outline:0;width:100%;font-size:15px}
+    .chips{display:flex;flex-wrap:wrap;gap:8px}
+    .chip{border:1px solid #d7dbe6;background:#fff;color:#123d99;padding:8px 12px;border-radius:999px;font-weight:600;cursor:pointer;transition:.18s}
+    .chip.is-active,.chip:hover{background:var(--elec-orange);border-color:var(--elec-orange);color:#fff}
+
+    /* Page grid */
+    .page{max-width:1100px;margin:18px auto 64px;padding:0 20px}
+
+    /* Project cards */
+    .proj{display:grid;grid-template-columns:1.05fr .95fr;gap:18px;align-items:center;background:#fff;border:1px solid #e6eaf2;border-radius:16px;box-shadow:var(--shadow);padding:14px;margin:16px 0}
+    .proj:nth-child(even){grid-template-columns:.95fr 1.05fr}
+    .proj__media{position:relative;border-radius:12px;overflow:hidden}
+    .proj__media img{width:100%;height:260px;object-fit:cover;display:block;transition:transform .35s ease}
+    .proj:hover .proj__media img{transform:scale(1.02)}
+    .proj__tag{position:absolute;left:10px;top:10px;background:rgba(0,0,0,.6);color:#fff;padding:6px 10px;border-radius:999px;font-size:13px}
+    .proj h3{margin:4px 0 6px;font-size:24px;color:#0b1a34}
+    .proj .meta{margin:0 0 10px;color:#2a3a4d}
+    .badges{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 10px}
+    .badge{background:#0b1a34;color:#fff;border-radius:999px;padding:6px 10px;font-size:12.5px}
+    .proj p{margin:8px 0 0;color:#2a3a4d;line-height:1.6}
+    .cta-row{display:flex;gap:8px;margin-top:12px}
+    .btn{display:inline-flex;align-items:center;gap:8px;padding:.6rem .9rem;border-radius:.6rem;border:1px solid #0b1a34;background:#0b1a34;color:#fff;text-decoration:none;font-weight:600}
+    .btn--ghost{background:#fff;color:#0b1a34;border-color:#d2d8e7}
+
+    @media (max-width:1000px){
+      .stats{grid-template-columns:1fr 1fr 1fr}
+      .proj{grid-template-columns:1fr}
+    }
+    @media (max-width:560px){
+      .stats{grid-template-columns:1fr 1fr}
+    }
+
+    /* Reveal */
+    .reveal{opacity:0;transform:translateY(12px);transition:opacity .5s ease, transform .5s ease}
+    .reveal.is-in{opacity:1;transform:none}
+    @media (prefers-reduced-motion: reduce){.reveal{transition:none!important;transform:none!important;opacity:1!important}}
+  </style>
+</head>
+<body>
+  <header class="site-header" role="banner">
+    <div class="main-bar">
+      <a class="logo" href="index.html" aria-label="Elecnor Home">
+        <img src="https://www.elecnor.com.au/storage/media/files/shares/logo-elecnoraustralia.png" alt="Elecnor" />
+      </a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav">
+        <span class="sr-only">Open menu</span>
+        <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+      </button>
+      <nav id="primary-nav" class="primary-nav" aria-label="Primary">
+        <ul class="top-level">
+          <li><a class="top-link" href="about.html">About</a></li>
+          <li class="has-sub">
+            <button class="top-link" type="button" aria-expanded="true" aria-controls="sub-projects">Projects</button>
+            <ul id="sub-projects" class="submenu" role="menu" aria-label="Projects">
+              <li role="none"><a role="menuitem" href="projects-wind.html">Wind</a></li>
+              <li role="none"><a role="menuitem" href="projects-solar.html">Solar</a></li>
+              <li role="none"><a role="menuitem" class="is-current" href="projects-bess.html" aria-current="page">BESS</a></li>
+              <li role="none"><a role="menuitem" href="projects-transmission.html">Power Transmission</a></li>
+            </ul>
+          </li>
+          <li><a class="top-link" href="sustainability.html">Sustainability</a></li>
+          <li><a class="top-link" href="careers.html">Careers</a></li>
+          <li><a class="top-link" href="news.html">News</a></li>
+          <li><a class="top-link" href="contact.html">Contact Us</a></li>
+        </ul>
+        <div class="nav-actions">
+          <a class="search-link" href="search.html" aria-label="Search">
+            <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24"><path d="M10 18a8 8 0 1 1 6.32-3.11L22 20.5l-1.5 1.5-5.68-5.61A8 8 0 0 1 10 18Z" fill="currentColor"/></svg>
+          </a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="bess-hero" role="banner">
+    <div class="bess-hero__inner">
+      <span class="eyebrow">Projects — BESS</span>
+      <h1 class="page-title">Battery Energy Storage—safe, fast and grid‑ready</h1>
+      <p class="lead">End‑to‑end delivery for utility‑scale BESS: civil &amp; electrical balance of plant, PCS/inverter blocks, HV substations and grid commissioning.</p>
+    </div>
+  </section>
+
+  <nav class="breadcrumbs" aria-label="Breadcrumb">
+    <a href="index.html">Home</a> › <span>Projects — BESS</span>
+  </nav>
+
+  <!-- Toolbar cards -->
+  <div class="toolbar-wrap" role="region" aria-label="Key figures and filters">
+    <div class="stats" aria-label="Key stats">
+      <div class="stat"><div class="stat__k">BESS projects delivered / in delivery</div><div class="stat__v" id="statProjects">—</div></div>
+      <div class="stat"><div class="stat__k">Largest single system (power / energy)</div><div class="stat__v">~200 MW / 400 MWh</div></div>
+      <div class="stat"><div class="stat__k">Typical substation range (kV)</div><div class="stat__v">33/132 – 33/330</div></div>
+    </div>
+    <div class="filters">
+      <label class="search" aria-label="Search projects">
+        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24"><path d="M10 18a8 8 0 1 1 6.32-3.11L22 20.5l-1.5 1.5-5.68-5.61A8 8 0 0 1 10 18Z" fill="#123d99"/></svg>
+        <input id="searchInput" type="search" placeholder="Search by project or state…"/>
+      </label>
+      <div class="chips" role="tablist" aria-label="Filter by state">
+        <button class="chip is-active" data-state="all" role="tab" aria-selected="true">All</button>
+        <button class="chip" data-state="ACT" role="tab">ACT</button>
+        <button class="chip" data-state="SA" role="tab">SA</button>
+        <!-- Keep the other states in case future BESS projects are added -->
+        <button class="chip" data-state="NSW" role="tab">NSW</button>
+        <button class="chip" data-state="QLD" role="tab">QLD</button>
+        <button class="chip" data-state="VIC" role="tab">VIC</button>
+      </div>
+    </div>
+  </div>
+
+  <main class="page" id="page" role="main"></main>
+
+  <script>
+    // BESS projects — content transcribed/adapted from the provided image
+    const PROJECTS = [
+      {
+        slug:'queanbeyan-bess',
+        title:'Queanbeyan BESS, ACT',
+        state:'ACT',
+        // Replace 'hero' with your final image path
+        hero:'https://www.ess-news.com/wp-content/uploads/2024/08/Bramley-BESS-image-BW-Group-sourced-from-PR.jpg',
+        badges:['BESS balance of plant','PCS & inverter blocks','HV substation & grid'],
+        copy:`Elecnor entered the Australian Battery Energy Storage System (BESS) market in 2021 by delivering the Queanbeyan BESS project (approximately 10 MW / 20 MWh). This engagement broadened our experience in the Australian market and laid the platform for more complex storage projects in future.`,
+        links:[
+          {label:'Project gallery',href:'#'},
+          {label:'Download factsheet',href:'#',ghost:true}
+        ]
+      },
+      {
+        slug:'blyth-bess',
+        title:'Blyth BESS, SA',
+        state:'SA',
+        hero:'https://esdnews.com.au/wp-content/uploads/2023/06/hazelwood-battery.jpg',
+        badges:['200 MW / 400 MWh system','Principal contractor packages','Grid commissioning'],
+        copy:`Blyth BESS is a 200 MW / 400 MWh battery energy storage project with a short transition from line to energisation milestones. Elecnor participates as principal contractor in partnership delivery, with scope covering civil and electrical works, HV interfaces and commissioning support. The project is connected to a wider program enabling dispatchable renewable supply.`,
+        links:[
+          {label:'Project overview',href:'#'},
+          {label:'Contact us',href:'contact.html',ghost:true}
+        ]
+      }
+    ];
+
+    const page=document.getElementById('page');
+    function render(list){
+      page.innerHTML='';
+      list.forEach((p,i)=>{
+        const el=document.createElement('section');
+        el.className='proj reveal';
+        el.id=p.slug;
+        el.innerHTML=`
+          <div class="proj__media">
+            <img src="${p.hero}" alt="${p.title}" loading="lazy"/>
+            <span class="proj__tag">BESS</span>
+          </div>
+          <div>
+            <h3>${p.title}</h3>
+            <p class="meta">State: <strong>${p.state}</strong></p>
+            <div class="badges">${(p.badges||[]).map(b=>`<span class="badge">${b}</span>`).join('')}</div>
+            <p>${p.copy}</p>
+            <div class="cta-row">${(p.links||[]).map(l=>`<a class="btn ${l.ghost?'btn--ghost':''}" href="${l.href}">${l.label}</a>`).join('')}</div>
+          </div>`;
+        page.appendChild(el);
+      });
+      const stat=document.getElementById('statProjects');
+      if(stat) stat.textContent=String(list.length);
+      observe();
+    }
+
+    // search + filter
+    const chips=[...document.querySelectorAll('.chip')];
+    let activeState='all';
+    function apply(){
+      const q=(document.getElementById('searchInput').value||'').toLowerCase().trim();
+      const out=PROJECTS.filter(p=>{
+        const s=activeState==='all'||p.state===activeState;
+        const hay=(p.title+' '+p.state+' '+(p.badges||[]).join(' ')+' '+p.copy).toLowerCase();
+        return s && (!q || hay.includes(q));
+      });
+      render(out);
+    }
+    document.getElementById('searchInput').addEventListener('input',apply);
+    chips.forEach(c=>c.addEventListener('click',()=>{chips.forEach(x=>x.classList.remove('is-active'));c.classList.add('is-active');activeState=c.dataset.state;apply();}));
+
+    // reveal
+    let io;
+    function observe(){
+      if(io) io.disconnect();
+      io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting) e.target.classList.add('is-in');});},{threshold:.18});
+      document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+    }
+
+    render(PROJECTS);
+  </script>
+
+  <script src="assets/js/nav.js"></script>
+</body>
+</html>
