@@ -98,8 +98,8 @@
       .hud-layout{grid-template-columns:1fr;gap:18px}
     }
 
-    /* >>> Animated powerline background (RESTORED) <<< */
-    .grid-anim{position:absolute;inset:0;z-index:1;pointer-events:none;mix-blend-mode:soft-light}
+    /* >>> Animated powerline background — HIDDEN per request <<< */
+    .grid-anim{display:none !important}
     .grid-anim svg{width:100%;height:100%;display:block}
     .wire{stroke:var(--elec-lightblue);stroke-width:2;fill:none;opacity:.7;stroke-dasharray:6 10;animation:flow 4s linear infinite}
     .wire2{stroke:#000;stroke-width:2;fill:none;opacity:.55;stroke-dasharray:4 12;animation:flow 6s linear infinite reverse}
@@ -204,8 +204,8 @@
   </section>
 
   <section class="hud-section" aria-label="Project video">
-    <!-- RESTORED animated SVG backdrop -->
-    <div class="grid-anim" aria-hidden="true">
+    <!-- Animated SVG backdrop — hidden via CSS (.grid-anim { display:none }) -->
+    <div class="grid-anim" aria-hidden="true" hidden>
       <svg viewBox="0 0 1200 600" preserveAspectRatio="none">
         <g class="tower">
           <polygon points="150,520 180,300 220,300 250,520" />
